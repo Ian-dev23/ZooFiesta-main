@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "ZooFiesta",
+    "slug": "ZooFiesta",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/animals_background.png",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/lotties/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#000000"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/logo/titulo_logo.png",
+        "backgroundColor": "#000000"
+      },
+      "edgeToEdgeEnabled": true,
+      "androidNavigationBar": {
+        "visible": "sticky-immersive",
+        "backgroundColor": "#000000"
+      }
+    },
+    "web": {
+      "favicon": "#000000"
+    },
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/logo/titulo_logo.png",
+          "imageWidth": 200,
+          "backgroundColor": "#000000",
+          "resizeMode": "contain"
+        }
+      ]
+    ]
+  }
+}
