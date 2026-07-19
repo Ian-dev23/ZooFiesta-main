@@ -1,184 +1,183 @@
-const animales = [
+const TOTAL_OBJETOS = 12;
+
+const FONDOS = {
+  conejo: require("../assets/backgrounds/HabitatConejo.png"),
+  mono: require("../assets/backgrounds/HabitatMono.png"),
+  elefante: require("../assets/backgrounds/HabitatElefante.png"),
+  jirafa: require("../assets/backgrounds/HabitatJirafa.png"),
+  oso: require("../assets/backgrounds/HabitatOso.png"),
+};
+
+const IMAGENES_ANIMALES = {
+  conejo: require("../assets/animals/Conejo.png"),
+  mono: require("../assets/animals/mono.png"),
+  elefante: require("../assets/animals/elefante.png"),
+  jirafa: require("../assets/animals/jirafa.png"),
+  oso: require("../assets/animals/oso.png"),
+};
+
+const OBJETOS = {
+  zanahoria: {
+    singular: "zanahoria",
+    plural: "zanahorias",
+    articuloIndefinido: "una",
+    articuloPlural: "las",
+    pronombreSingular: "la",
+    pronombrePlural: "las",
+    imagen: require("../assets/objects/zanahoria.png"),
+  },
+
+  lechuga: {
+    singular: "lechuga",
+    plural: "lechugas",
+    articuloIndefinido: "una",
+    articuloPlural: "las",
+    pronombreSingular: "la",
+    pronombrePlural: "las",
+    imagen: require("../assets/objects/lechuga.png"),
+  },
+
+  platano: {
+    singular: "plátano",
+    plural: "plátanos",
+    articuloIndefinido: "un",
+    articuloPlural: "los",
+    pronombreSingular: "lo",
+    pronombrePlural: "los",
+    imagen: require("../assets/objects/platano.png"),
+  },
+
+  sandia: {
+    singular: "sandía",
+    plural: "sandías",
+    articuloIndefinido: "una",
+    articuloPlural: "las",
+    pronombreSingular: "la",
+    pronombrePlural: "las",
+    imagen: require("../assets/objects/sandia.png"),
+  },
+
+  maiz: {
+    singular: "mazorca de maíz",
+    plural: "mazorcas de maíz",
+    articuloIndefinido: "una",
+    articuloPlural: "las",
+    pronombreSingular: "la",
+    pronombrePlural: "las",
+    imagen: require("../assets/objects/maiz.png"),
+  },
+
+  manzana: {
+    singular: "manzana",
+    plural: "manzanas",
+    articuloIndefinido: "una",
+    articuloPlural: "las",
+    pronombreSingular: "la",
+    pronombrePlural: "las",
+    imagen: require("../assets/objects/manzana.png"),
+  },
+
+  pera: {
+    singular: "pera",
+    plural: "peras",
+    articuloIndefinido: "una",
+    articuloPlural: "las",
+    pronombreSingular: "la",
+    pronombrePlural: "las",
+    imagen: require("../assets/objects/pera.png"),
+  },
+
+  uva: {
+    singular: "uva",
+    plural: "uvas",
+    articuloIndefinido: "una",
+    articuloPlural: "las",
+    pronombreSingular: "la",
+    pronombrePlural: "las",
+    imagen: require("../assets/objects/uva.png"),
+  },
+
+  naranja: {
+    singular: "naranja",
+    plural: "naranjas",
+    articuloIndefinido: "una",
+    articuloPlural: "las",
+    pronombreSingular: "la",
+    pronombrePlural: "las",
+    imagen: require("../assets/objects/naranja.png"),
+  },
+};
+
+const configuraciones = [
   {
     id: 1,
     nombre: "Conejo",
-    cantidad: 4,
+    presentacion: "el conejito",
 
-    imagenFondo: require("../assets/background.png"),
+    imagenAnimal: IMAGENES_ANIMALES.conejo,
+    imagenFondo: FONDOS.conejo,
 
     objetoBuscado: "zanahoria",
-    objetoBuscadoPlural: "zanahorias",
+    cantidadMinima: 2,
+    cantidadMaxima: 5,
 
-    mensajeIntroduccion:
-      "Hola, soy el conejito. Tengo que llevar 4 zanahorias a la fiesta. ¿Me ayudas a encontrarlas?",
-
-    mensajeError:
-      "Ups, eso no parece una zanahoria. Busca las zanahorias.",
-
-    mensajeCompletado:
-      "Muy bien. Encontraste las 4 zanahorias.",
-
-    imagenAnimal: null,
-    imagenObjetoBuscado: null,
-
-    audioIntroduccion: null,
-    audioError: null,
-    audioCompletado: null,
-
-    audioRecordatorio: {
-      1: null,
-      2: null,
-      3: null,
-      4: null,
-    },
-
-    objetos: [
-      { id: "1-1", tipo: "zanahoria", correcto: true, imagen: null },
-      { id: "1-2", tipo: "lechuga", correcto: false, imagen: null },
-      { id: "1-3", tipo: "platano", correcto: false, imagen: null },
-      { id: "1-4", tipo: "sandia", correcto: false, imagen: null },
-
-      { id: "1-5", tipo: "maiz", correcto: false, imagen: null },
-      { id: "1-6", tipo: "zanahoria", correcto: true, imagen: null },
-      { id: "1-7", tipo: "sandia", correcto: false, imagen: null },
-      { id: "1-8", tipo: "zanahoria", correcto: true, imagen: null },
-
-      { id: "1-9", tipo: "lechuga", correcto: false, imagen: null },
-      { id: "1-10", tipo: "zanahoria", correcto: true, imagen: null },
-      { id: "1-11", tipo: "platano", correcto: false, imagen: null },
-      { id: "1-12", tipo: "sandia", correcto: false, imagen: null },
+    distractores: [
+      "lechuga",
+      "platano",
+      "sandia",
+      "maiz",
     ],
-  },
 
-  {
-    id: 2,
-    nombre: "Mono",
-    cantidad: 5,
-
-    imagenFondo: require("../assets/background.png"),
-
-    objetoBuscado: "platano",
-    objetoBuscadoPlural: "plátanos",
-
-    mensajeIntroduccion:
-      "Hola, soy el monito. Tengo que llevar 5 plátanos a la fiesta. ¿Me ayudas a encontrarlos?",
-
-    mensajeError:
-      "Ups, eso no parece un plátano. Busca los plátanos.",
-
-    mensajeCompletado:
-      "Muy bien. Encontraste los 5 plátanos.",
-
-    imagenAnimal: null,
-    imagenObjetoBuscado: null,
-
-    audioIntroduccion: null,
     audioError: null,
     audioCompletado: null,
 
-    audioRecordatorio: {
-      1: null,
+    audiosIntroduccion: {
       2: null,
       3: null,
       4: null,
       5: null,
     },
 
-    objetos: [
-      { id: "2-1", tipo: "platano", correcto: true, imagen: null },
-      { id: "2-2", tipo: "manzana", correcto: false, imagen: null },
-      { id: "2-3", tipo: "platano", correcto: true, imagen: null },
-      { id: "2-4", tipo: "pera", correcto: false, imagen: null },
-
-      { id: "2-5", tipo: "sandia", correcto: false, imagen: null },
-      { id: "2-6", tipo: "platano", correcto: true, imagen: null },
-      { id: "2-7", tipo: "manzana", correcto: false, imagen: null },
-      { id: "2-8", tipo: "platano", correcto: true, imagen: null },
-
-      { id: "2-9", tipo: "uva", correcto: false, imagen: null },
-      { id: "2-10", tipo: "pera", correcto: false, imagen: null },
-      { id: "2-11", tipo: "platano", correcto: true, imagen: null },
-      { id: "2-12", tipo: "sandia", correcto: false, imagen: null },
-    ],
-  },
-
-  {
-    id: 3,
-    nombre: "Elefante",
-    cantidad: 3,
-
-    imagenFondo: require("../assets/background.png"),
-
-    objetoBuscado: "manzana",
-    objetoBuscadoPlural: "manzanas",
-
-    mensajeIntroduccion:
-      "Hola, soy el elefante. Tengo que llevar 3 manzanas a la fiesta. ¿Me ayudas a encontrarlas?",
-
-    mensajeError:
-      "Ups, eso no parece una manzana. Busca las manzanas.",
-
-    mensajeCompletado:
-      "Muy bien. Encontraste las 3 manzanas.",
-
-    imagenAnimal: null,
-    imagenObjetoBuscado: null,
-
-    audioIntroduccion: null,
-    audioError: null,
-    audioCompletado: null,
-
-    audioRecordatorio: {
+    audiosRecordatorio: {
       1: null,
       2: null,
       3: null,
+      4: null,
+      5: null,
     },
-
-    objetos: [
-      { id: "3-1", tipo: "pera", correcto: false, imagen: null },
-      { id: "3-2", tipo: "manzana", correcto: true, imagen: null },
-      { id: "3-3", tipo: "uva", correcto: false, imagen: null },
-      { id: "3-4", tipo: "sandia", correcto: false, imagen: null },
-
-      { id: "3-5", tipo: "manzana", correcto: true, imagen: null },
-      { id: "3-6", tipo: "platano", correcto: false, imagen: null },
-      { id: "3-7", tipo: "pera", correcto: false, imagen: null },
-      { id: "3-8", tipo: "naranja", correcto: false, imagen: null },
-
-      { id: "3-9", tipo: "sandia", correcto: false, imagen: null },
-      { id: "3-10", tipo: "uva", correcto: false, imagen: null },
-      { id: "3-11", tipo: "manzana", correcto: true, imagen: null },
-      { id: "3-12", tipo: "platano", correcto: false, imagen: null },
-    ],
   },
 
   {
-    id: 4,
-    nombre: "Jirafa",
-    cantidad: 6,
+    id: 2,
+    nombre: "Mono",
+    presentacion: "el monito",
 
-    imagenFondo: require("../assets/background.png"),
+    imagenAnimal: IMAGENES_ANIMALES.mono,
+    imagenFondo: FONDOS.mono,
 
-    objetoBuscado: "pera",
-    objetoBuscadoPlural: "peras",
+    objetoBuscado: "platano",
+    cantidadMinima: 3,
+    cantidadMaxima: 6,
 
-    mensajeIntroduccion:
-      "Hola, soy la jirafa. Tengo que llevar 6 peras a la fiesta. ¿Me ayudas a encontrarlas?",
+    distractores: [
+      "manzana",
+      "pera",
+      "sandia",
+      "uva",
+      "naranja",
+    ],
 
-    mensajeError:
-      "Ups, eso no parece una pera. Busca las peras.",
-
-    mensajeCompletado:
-      "Muy bien. Encontraste las 6 peras.",
-
-    imagenAnimal: null,
-    imagenObjetoBuscado: null,
-
-    audioIntroduccion: null,
     audioError: null,
     audioCompletado: null,
 
-    audioRecordatorio: {
+    audiosIntroduccion: {
+      3: null,
+      4: null,
+      5: null,
+      6: null,
+    },
+
+    audiosRecordatorio: {
       1: null,
       2: null,
       3: null,
@@ -186,73 +185,285 @@ const animales = [
       5: null,
       6: null,
     },
+  },
 
-    objetos: [
-      { id: "4-1", tipo: "pera", correcto: true, imagen: null },
-      { id: "4-2", tipo: "manzana", correcto: false, imagen: null },
-      { id: "4-3", tipo: "pera", correcto: true, imagen: null },
-      { id: "4-4", tipo: "platano", correcto: false, imagen: null },
+  {
+    id: 3,
+    nombre: "Elefante",
+    presentacion: "el elefante",
 
-      { id: "4-5", tipo: "pera", correcto: true, imagen: null },
-      { id: "4-6", tipo: "sandia", correcto: false, imagen: null },
-      { id: "4-7", tipo: "pera", correcto: true, imagen: null },
-      { id: "4-8", tipo: "manzana", correcto: false, imagen: null },
+    imagenAnimal: IMAGENES_ANIMALES.elefante,
+    imagenFondo: FONDOS.elefante,
 
-      { id: "4-9", tipo: "pera", correcto: true, imagen: null },
-      { id: "4-10", tipo: "uva", correcto: false, imagen: null },
-      { id: "4-11", tipo: "pera", correcto: true, imagen: null },
-      { id: "4-12", tipo: "naranja", correcto: false, imagen: null },
+    objetoBuscado: "manzana",
+    cantidadMinima: 2,
+    cantidadMaxima: 5,
+
+    distractores: [
+      "pera",
+      "uva",
+      "sandia",
+      "platano",
+      "naranja",
     ],
+
+    audioError: null,
+    audioCompletado: null,
+
+    audiosIntroduccion: {
+      2: null,
+      3: null,
+      4: null,
+      5: null,
+    },
+
+    audiosRecordatorio: {
+      1: null,
+      2: null,
+      3: null,
+      4: null,
+      5: null,
+    },
+  },
+
+  {
+    id: 4,
+    nombre: "Jirafa",
+    presentacion: "la jirafa",
+
+    imagenAnimal: IMAGENES_ANIMALES.jirafa,
+    imagenFondo: FONDOS.jirafa,
+
+    objetoBuscado: "pera",
+    cantidadMinima: 4,
+    cantidadMaxima: 7,
+
+    distractores: [
+      "manzana",
+      "platano",
+      "sandia",
+      "uva",
+      "naranja",
+    ],
+
+    audioError: null,
+    audioCompletado: null,
+
+    audiosIntroduccion: {
+      4: null,
+      5: null,
+      6: null,
+      7: null,
+    },
+
+    audiosRecordatorio: {
+      1: null,
+      2: null,
+      3: null,
+      4: null,
+      5: null,
+      6: null,
+      7: null,
+    },
   },
 
   {
     id: 5,
     nombre: "Oso",
-    cantidad: 2,
+    presentacion: "el osito",
 
-    imagenFondo: require("../assets/background.png"),
+    imagenAnimal: IMAGENES_ANIMALES.oso,
+    imagenFondo: FONDOS.oso,
 
     objetoBuscado: "sandia",
-    objetoBuscadoPlural: "sandías",
+    cantidadMinima: 2,
+    cantidadMaxima: 4,
 
-    mensajeIntroduccion:
-      "Hola, soy el osito. Tengo que llevar 2 sandías a la fiesta. ¿Me ayudas a encontrarlas?",
+    distractores: [
+      "manzana",
+      "platano",
+      "pera",
+      "uva",
+      "naranja",
+    ],
 
-    mensajeError:
-      "Ups, eso no parece una sandía. Busca las sandías.",
-
-    mensajeCompletado:
-      "Muy bien. Encontraste las 2 sandías.",
-
-    imagenAnimal: null,
-    imagenObjetoBuscado: null,
-
-    audioIntroduccion: null,
     audioError: null,
     audioCompletado: null,
 
-    audioRecordatorio: {
-      1: null,
+    audiosIntroduccion: {
       2: null,
+      3: null,
+      4: null,
     },
 
-    objetos: [
-      { id: "5-1", tipo: "manzana", correcto: false, imagen: null },
-      { id: "5-2", tipo: "platano", correcto: false, imagen: null },
-      { id: "5-3", tipo: "sandia", correcto: true, imagen: null },
-      { id: "5-4", tipo: "pera", correcto: false, imagen: null },
-
-      { id: "5-5", tipo: "uva", correcto: false, imagen: null },
-      { id: "5-6", tipo: "naranja", correcto: false, imagen: null },
-      { id: "5-7", tipo: "manzana", correcto: false, imagen: null },
-      { id: "5-8", tipo: "platano", correcto: false, imagen: null },
-
-      { id: "5-9", tipo: "pera", correcto: false, imagen: null },
-      { id: "5-10", tipo: "sandia", correcto: true, imagen: null },
-      { id: "5-11", tipo: "uva", correcto: false, imagen: null },
-      { id: "5-12", tipo: "naranja", correcto: false, imagen: null },
-    ],
+    audiosRecordatorio: {
+      1: null,
+      2: null,
+      3: null,
+      4: null,
+    },
   },
 ];
 
-export default animales;
+const obtenerNumeroAleatorio = (minimo, maximo) => {
+  return (
+    Math.floor(Math.random() * (maximo - minimo + 1)) +
+    minimo
+  );
+};
+
+const mezclarElementos = (elementos) => {
+  const resultado = [...elementos];
+
+  for (
+    let posicion = resultado.length - 1;
+    posicion > 0;
+    posicion -= 1
+  ) {
+    const posicionAleatoria = Math.floor(
+      Math.random() * (posicion + 1)
+    );
+
+    [
+      resultado[posicion],
+      resultado[posicionAleatoria],
+    ] = [
+      resultado[posicionAleatoria],
+      resultado[posicion],
+    ];
+  }
+
+  return resultado;
+};
+
+const crearId = (nivelId, tipo, indice) => {
+  const parteAleatoria = Math.random()
+    .toString(36)
+    .slice(2, 9);
+
+  return `${nivelId}-${tipo}-${indice}-${parteAleatoria}`;
+};
+
+const crearObjetosCorrectos = (
+  configuracion,
+  cantidad,
+  objeto
+) => {
+  return Array.from(
+    { length: cantidad },
+    (_, indice) => ({
+      id: crearId(
+        configuracion.id,
+        configuracion.objetoBuscado,
+        indice
+      ),
+      tipo: configuracion.objetoBuscado,
+      correcto: true,
+      imagen: objeto.imagen,
+    })
+  );
+};
+
+const crearObjetosDistractores = (
+  configuracion,
+  cantidad
+) => {
+  const tiposDisponibles = [];
+
+  while (tiposDisponibles.length < cantidad) {
+    tiposDisponibles.push(
+      ...mezclarElementos(configuracion.distractores)
+    );
+  }
+
+  return tiposDisponibles
+    .slice(0, cantidad)
+    .map((tipo, indice) => ({
+      id: crearId(
+        configuracion.id,
+        tipo,
+        indice
+      ),
+      tipo,
+      correcto: false,
+      imagen: OBJETOS[tipo].imagen,
+    }));
+};
+
+export const crearNivelJugable = (configuracion) => {
+  const cantidad = obtenerNumeroAleatorio(
+    configuracion.cantidadMinima,
+    configuracion.cantidadMaxima
+  );
+
+  const objeto =
+    OBJETOS[configuracion.objetoBuscado];
+
+  const objetosCorrectos =
+    crearObjetosCorrectos(
+      configuracion,
+      cantidad,
+      objeto
+    );
+
+  const objetosDistractores =
+    crearObjetosDistractores(
+      configuracion,
+      TOTAL_OBJETOS - cantidad
+    );
+
+  const nombreObjeto =
+    cantidad === 1
+      ? objeto.singular
+      : objeto.plural;
+
+  const pronombre =
+    cantidad === 1
+      ? objeto.pronombreSingular
+      : objeto.pronombrePlural;
+
+  return {
+    ...configuracion,
+
+    cantidad,
+
+    // Mantiene el fondo asignado a cada animal.
+    imagenFondo: configuracion.imagenFondo,
+
+    imagenObjetoBuscado: objeto.imagen,
+    imagenBotonAudio: null,
+
+    objetoBuscadoPlural: objeto.plural,
+
+    mensajeIntroduccion:
+      `Hola, soy ${configuracion.presentacion}. ` +
+      `Tengo que llevar ${cantidad} ${nombreObjeto} ` +
+      `a la fiesta. ¿Me ayudas a encontrar${pronombre}?`,
+
+    mensajeError:
+      `Ups, eso no parece ${objeto.articuloIndefinido} ` +
+      `${objeto.singular}. Busca ${objeto.articuloPlural} ` +
+      `${objeto.plural}.`,
+
+    mensajeCompletado:
+      `Muy bien. Encontraste ${cantidad} ${nombreObjeto}.`,
+
+    audioIntroduccion:
+      configuracion.audiosIntroduccion[cantidad] ??
+      null,
+
+    audioRecordatorio:
+      configuracion.audiosRecordatorio,
+
+    objetos: mezclarElementos([
+      ...objetosCorrectos,
+      ...objetosDistractores,
+    ]),
+  };
+};
+
+export const crearPartida = () => {
+  return configuraciones.map(crearNivelJugable);
+};
+
+export default configuraciones;
