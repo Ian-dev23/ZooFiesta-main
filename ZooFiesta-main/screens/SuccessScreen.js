@@ -47,7 +47,7 @@ export default function SuccessScreen({
       <TouchableOpacity
         style={styles.boton}
         onPress={() =>
-          navigation.popToTop()
+          navigation.replace("Game")
         }
       >
         <Text style={styles.textoBoton}>

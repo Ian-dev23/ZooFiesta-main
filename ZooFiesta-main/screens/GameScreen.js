@@ -416,7 +416,7 @@ export default function GameScreen({
   const { width: screenWidth } =
     useWindowDimensions();
 
-  const [niveles] = useState(() =>
+  const [niveles, setNiveles] = useState(() =>
     crearPartida()
   );
 
@@ -474,6 +474,17 @@ export default function GameScreen({
   useFocusEffect(
     useCallback(() => {
       pantallaActivaRef.current = true;
+
+      const nivelesNuevos = crearPartida();
+
+      setNiveles(nivelesNuevos);
+
+      seleccionadosRef.current = [];
+      bloqueadoRef.current = true;
+
+      dispatch({
+        type: "NUEVA_PARTIDA",
+      });
 
       const prepararAudio = async () => {
         try {
@@ -646,7 +657,7 @@ export default function GameScreen({
         niveles.length - 1;
 
       if (esUltimoNivel) {
-        navigation.replace("Success");
+        navigation.replace("Game");
         return;
       }
 
