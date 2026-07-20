@@ -5,6 +5,8 @@ import React, {
 
 import {
   ActivityIndicator,
+  Image,
+  ImageBackground,
   Platform,
   Pressable,
   SafeAreaView,
@@ -27,7 +29,9 @@ const CLAVE_NOMBRE = "nombreJugador";
 export default function SuccessScreen({
   navigation,
 }) {
-  const [nombre, setNombre] = useState("");
+  const [nombre, setNombre] =
+    useState("");
+
   const [cargando, setCargando] =
     useState(true);
 
@@ -35,53 +39,66 @@ export default function SuccessScreen({
     useCallback(() => {
       let pantallaActiva = true;
 
-      const prepararPantalla = async () => {
-        if (Platform.OS === "android") {
-          NavigationBar.setBehaviorAsync(
-            "overlay-swipe"
-          ).catch(() => {});
+      const prepararPantalla =
+        async () => {
+          if (
+            Platform.OS === "android"
+          ) {
+            NavigationBar
+              .setBehaviorAsync(
+                "overlay-swipe"
+              )
+              .catch(() => {});
 
-          NavigationBar.setVisibilityAsync(
-            "hidden"
-          ).catch(() => {});
-        }
+            NavigationBar
+              .setVisibilityAsync(
+                "hidden"
+              )
+              .catch(() => {});
+          }
 
-        try {
-          const nombreGuardado =
-            await AsyncStorage.getItem(
-              CLAVE_NOMBRE
-            );
+          try {
+            const nombreGuardado =
+              await AsyncStorage.getItem(
+                CLAVE_NOMBRE
+              );
 
-          if (pantallaActiva) {
+            if (!pantallaActiva) {
+              return;
+            }
+
             setNombre(
               nombreGuardado?.trim() ||
                 "AMIGO"
             );
 
             setCargando(false);
-          }
-        } catch (error) {
-          console.warn(
-            "No se pudo cargar el nombre:",
-            error
-          );
+          } catch (error) {
+            console.warn(
+              "No se pudo cargar el nombre:",
+              error
+            );
 
-          if (pantallaActiva) {
-            setNombre("AMIGO");
-            setCargando(false);
+            if (pantallaActiva) {
+              setNombre("AMIGO");
+              setCargando(false);
+            }
           }
-        }
-      };
+        };
 
       prepararPantalla();
 
       return () => {
         pantallaActiva = false;
 
-        if (Platform.OS === "android") {
-          NavigationBar.setVisibilityAsync(
-            "visible"
-          ).catch(() => {});
+        if (
+          Platform.OS === "android"
+        ) {
+          NavigationBar
+            .setVisibilityAsync(
+              "visible"
+            )
+            .catch(() => {});
         }
       };
     }, [])
@@ -90,6 +107,7 @@ export default function SuccessScreen({
   const volverAlInicio = () => {
     navigation.reset({
       index: 0,
+
       routes: [
         {
           name: "Home",
@@ -99,15 +117,18 @@ export default function SuccessScreen({
   };
 
   const volverAJugar = () => {
-    navigation.replace("Game", {
-      partidaId: Date.now(),
-    });
+    navigation.replace(
+      "Game",
+      {
+        partidaId: Date.now(),
+      }
+    );
   };
 
   if (cargando) {
     return (
       <SafeAreaView
-        style={styles.container}
+        style={styles.pantallaCarga}
       >
         <ActivityIndicator
           size="large"
@@ -118,235 +139,205 @@ export default function SuccessScreen({
   }
 
   return (
-    <SafeAreaView
-      style={styles.container}
-    >
-      <View style={styles.tarjeta}>
-        <View style={styles.decoracion}>
-          <Text style={styles.textoDecoracion}>
-            ¡FIESTA COMPLETADA!
-          </Text>
-        </View>
-
-        <Text style={styles.titulo}>
-          ¡GRACIAS{" "}
-          {nombre.toUpperCase()}!
-        </Text>
-
-        <Text style={styles.mensaje}>
-          GRACIAS A TI, LA FIESTA FUE UN
-          ÉXITO.
-        </Text>
-
-        <View style={styles.separador} />
-
-        <View style={styles.botones}>
-          <Pressable
-            onPress={volverAlInicio}
-            accessibilityRole="button"
-            accessibilityLabel="Volver al inicio"
-            style={({ pressed }) => [
-              styles.boton,
-              styles.botonInicio,
-
-              pressed &&
-                styles.botonPresionado,
-            ]}
+    <View style={styles.container}>
+      <ImageBackground
+        source={require(
+          "../assets/backgrounds/SuccessScreen.png"
+        )}
+        style={styles.imagenFondo}
+        resizeMode="cover"
+      >
+        <SafeAreaView
+          style={styles.contenido}
+        >
+          <View
+            pointerEvents="none"
+            style={
+              styles.contenedorNombre
+            }
           >
-            <View
-              style={styles.contenidoBoton}
+            <Text
+              style={styles.nombre}
+              numberOfLines={1}
+              adjustsFontSizeToFit
             >
-              <Text
-                style={styles.simboloInicio}
-              >
-                ⌂
-              </Text>
+              {nombre.toUpperCase()}
+            </Text>
+          </View>
 
-              <Text
-                style={
-                  styles.textoBotonInicio
-                }
-              >
-                Volver al inicio
-              </Text>
-            </View>
-          </Pressable>
-
-          <Pressable
-            onPress={volverAJugar}
-            accessibilityRole="button"
-            accessibilityLabel="Volver a jugar"
-            style={({ pressed }) => [
-              styles.boton,
-              styles.botonJugar,
-
-              pressed &&
-                styles.botonPresionado,
-            ]}
+          <View
+            style={
+              styles.contenedorBotones
+            }
           >
-            <View
-              style={styles.contenidoBoton}
-            >
-              <Text
-                style={styles.simboloJugar}
-              >
-                ↻
-              </Text>
+            <Pressable
+              onPress={volverAlInicio}
+              accessibilityRole="button"
+              accessibilityLabel="Volver al inicio"
+              style={({ pressed }) => [
+                styles.botonInicio,
 
-              <Text
+                pressed &&
+                  styles.botonPresionado,
+              ]}
+            >
+              <Image
+                source={require(
+                  "../assets/botton/BtnVolverInicio.png"
+                )}
                 style={
-                  styles.textoBotonJugar
+                  styles.imagenBoton
                 }
-              >
-                Volver a jugar
-              </Text>
-            </View>
-          </Pressable>
-        </View>
-      </View>
-    </SafeAreaView>
+                resizeMode="contain"
+              />
+            </Pressable>
+
+            <Pressable
+              onPress={volverAJugar}
+              accessibilityRole="button"
+              accessibilityLabel="Volver a jugar"
+              style={({ pressed }) => [
+                styles.botonJugar,
+
+                pressed &&
+                  styles.botonPresionado,
+              ]}
+            >
+              <Image
+                source={require(
+                  "../assets/botton/BtnVolverJugar.png"
+                )}
+                style={
+                  styles.imagenBoton
+                }
+                resizeMode="contain"
+              />
+            </Pressable>
+          </View>
+        </SafeAreaView>
+      </ImageBackground>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFF9E8",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 22,
+    backgroundColor: "#58C9ED",
   },
 
-  tarjeta: {
-    width: "100%",
-    maxWidth: 420,
-    paddingHorizontal: 24,
-    paddingVertical: 34,
-    borderRadius: 30,
-    borderWidth: 4,
-    borderColor: "#4CAF50",
-    backgroundColor: "#FFFFFF",
-    alignItems: "center",
-    elevation: 8,
+  pantallaCarga: {
+    flex: 1,
 
-    shadowColor: "#000000",
-    shadowOffset: {
+    justifyContent: "center",
+    alignItems: "center",
+
+    backgroundColor: "#58C9ED",
+  },
+
+  imagenFondo: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+  },
+
+  contenido: {
+    flex: 1,
+    position: "relative",
+  },
+
+  /*
+   * El nombre aparece dentro del cartel,
+   * debajo del mensaje que ya está
+   * incluido en la imagen.
+   */
+  contenedorNombre: {
+    position: "absolute",
+
+    top: "56.5%",
+    left: "17%",
+    right: "17%",
+
+    minHeight: 42,
+
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  nombre: {
+    color: "#7A3F22",
+
+    fontSize: 25,
+    lineHeight: 31,
+    fontWeight: "900",
+
+    textAlign: "center",
+
+    textShadowColor:
+      "rgba(255, 255, 255, 0.75)",
+
+    textShadowOffset: {
       width: 0,
-      height: 4,
+      height: 2,
     },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
+
+    textShadowRadius: 2,
   },
 
-  decoracion: {
-    marginBottom: 18,
-    paddingHorizontal: 18,
-    paddingVertical: 7,
-    borderRadius: 18,
-    borderWidth: 2,
-    borderColor: "#FFB300",
-    backgroundColor: "#FFF3C4",
-  },
+contenedorBotones: {
+  position: "absolute",
 
-  textoDecoracion: {
-    color: "#C94F00",
-    fontSize: 14,
-    fontWeight: "900",
-    letterSpacing: 1,
-    textAlign: "center",
-  },
+  left: 4,
+  right: 4,
 
-  titulo: {
-    color: "#2E7D32",
-    fontSize: 30,
-    lineHeight: 38,
-    fontWeight: "900",
-    textAlign: "center",
-  },
+  bottom:
+    Platform.OS === "android"
+      ? 28
+      : 70,
 
-  mensaje: {
-    marginTop: 18,
-    color: "#424242",
-    fontSize: 22,
-    lineHeight: 30,
-    fontWeight: "800",
-    textAlign: "center",
-  },
+  alignItems: "center",
+  gap:0,
+},
 
-  separador: {
-    width: "75%",
-    height: 3,
-    marginTop: 26,
-    borderRadius: 2,
-    backgroundColor: "#FFE0B2",
-  },
+botonInicio: {
+  width: "75%",
+  maxWidth: 440,
 
-  botones: {
+  aspectRatio: 800 / 213,
+
+  justifyContent: "center",
+  alignItems: "center",
+    marginBottom:20,
+},
+
+botonJugar: {
+  width: "75%",
+  maxWidth: 440,
+
+  aspectRatio: 800 / 227,
+
+  justifyContent: "center",
+  alignItems: "center",
+  marginBottom:45,
+},
+
+imagenBoton: {
+  width: "100%",
+  height: "100%",
+},
+
+  imagenBoton: {
     width: "100%",
-    marginTop: 28,
-    gap: 14,
-  },
-
-  boton: {
-    width: "100%",
-    minHeight: 58,
-    paddingHorizontal: 18,
-    borderRadius: 17,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  botonInicio: {
-    borderWidth: 3,
-    borderColor: "#F57C00",
-    backgroundColor: "#FFFFFF",
-  },
-
-  botonJugar: {
-    borderWidth: 3,
-    borderColor: "#2E7D32",
-    backgroundColor: "#4CAF50",
+    height: "100%",
   },
 
   botonPresionado: {
+    opacity: 0.82,
+
     transform: [
       {
-        scale: 0.97,
+        scale: 0.96,
       },
     ],
-    opacity: 0.85,
-  },
-
-  contenidoBoton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-  },
-
-  simboloInicio: {
-    color: "#C94F00",
-    fontSize: 28,
-    lineHeight: 30,
-    fontWeight: "900",
-  },
-
-  simboloJugar: {
-    color: "#FFFFFF",
-    fontSize: 28,
-    lineHeight: 30,
-    fontWeight: "900",
-  },
-
-  textoBotonInicio: {
-    color: "#C94F00",
-    fontSize: 18,
-    fontWeight: "900",
-  },
-
-  textoBotonJugar: {
-    color: "#FFFFFF",
-    fontSize: 18,
-    fontWeight: "900",
   },
 });

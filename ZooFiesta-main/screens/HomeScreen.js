@@ -47,41 +47,61 @@ export default function HomeScreen({
   ).current;
 
   const soundRef = useRef(null);
-  const soundEnabledRef = useRef(true);
 
-  const confettiLeftRef = useRef(null);
-  const confettiRightRef = useRef(null);
+  const soundEnabledRef =
+    useRef(true);
 
-  const [soundEnabled, setSoundEnabled] =
-    useState(true);
+  const confettiLeftRef =
+    useRef(null);
 
-  const [nombreGuardado, setNombreGuardado] =
-    useState("");
+  const confettiRightRef =
+    useRef(null);
 
-  const [nombreTemporal, setNombreTemporal] =
-    useState("");
+  const [
+    soundEnabled,
+    setSoundEnabled,
+  ] = useState(true);
 
-  const [modalVisible, setModalVisible] =
-    useState(false);
+  const [
+    nombreGuardado,
+    setNombreGuardado,
+  ] = useState("");
+
+  const [
+    nombreTemporal,
+    setNombreTemporal,
+  ] = useState("");
+
+  const [
+    modalVisible,
+    setModalVisible,
+  ] = useState(false);
 
   useEffect(() => {
-    soundEnabledRef.current = soundEnabled;
+    soundEnabledRef.current =
+      soundEnabled;
   }, [soundEnabled]);
 
   useEffect(() => {
     const animation = Animated.loop(
       Animated.sequence([
-        Animated.timing(floatAnim, {
-          toValue: -15,
-          duration: 1500,
-          useNativeDriver: true,
-        }),
+        Animated.timing(
+          floatAnim,
+          {
+            toValue: -15,
+            duration: 1500,
+            useNativeDriver: true,
+          }
+        ),
 
-        Animated.timing(floatAnim, {
-          toValue: 0,
-          duration: 1500,
-          useNativeDriver: true,
-        }),
+        Animated.timing(
+          floatAnim,
+          {
+            toValue: 0,
+            duration: 1500,
+            useNativeDriver: true,
+          }
+        ),
       ])
     );
 
@@ -89,6 +109,9 @@ export default function HomeScreen({
 
     return () => {
       animation.stop();
+
+      floatAnim.stopAnimation();
+      floatAnim.setValue(0);
     };
   }, [floatAnim]);
 
@@ -96,31 +119,37 @@ export default function HomeScreen({
     useCallback(() => {
       let pantallaActiva = true;
 
-      const cargarNombre = async () => {
-        try {
-          const nombre =
-            await AsyncStorage.getItem(
-              CLAVE_NOMBRE
+      const cargarNombre =
+        async () => {
+          try {
+            const nombre =
+              await AsyncStorage.getItem(
+                CLAVE_NOMBRE
+              );
+
+            if (!pantallaActiva) {
+              return;
+            }
+
+            if (nombre) {
+              setNombreGuardado(
+                nombre
+              );
+
+              setNombreTemporal(
+                nombre
+              );
+            } else {
+              setNombreGuardado("");
+              setNombreTemporal("");
+            }
+          } catch (error) {
+            console.warn(
+              "No se pudo cargar el nombre:",
+              error
             );
-
-          if (!pantallaActiva) {
-            return;
           }
-
-          if (nombre) {
-            setNombreGuardado(nombre);
-            setNombreTemporal(nombre);
-          } else {
-            setNombreGuardado("");
-            setNombreTemporal("");
-          }
-        } catch (error) {
-          console.warn(
-            "No se pudo cargar el nombre:",
-            error
-          );
-        }
-      };
+        };
 
       cargarNombre();
 
@@ -135,53 +164,71 @@ export default function HomeScreen({
       let pantallaActiva = true;
       let sonidoCreado = null;
 
-      if (Platform.OS === "android") {
-        NavigationBar.setBehaviorAsync(
-          "overlay-swipe"
-        ).catch(() => {});
+      if (
+        Platform.OS === "android"
+      ) {
+        NavigationBar
+          .setBehaviorAsync(
+            "overlay-swipe"
+          )
+          .catch(() => {});
 
-        NavigationBar.setVisibilityAsync(
-          "hidden"
-        ).catch(() => {});
+        NavigationBar
+          .setVisibilityAsync(
+            "hidden"
+          )
+          .catch(() => {});
       }
 
-      const cargarMusica = async () => {
-        try {
-          await Audio.setAudioModeAsync({
-            playsInSilentModeIOS: true,
-            staysActiveInBackground: false,
-            shouldDuckAndroid: true,
-          });
+      const cargarMusica =
+        async () => {
+          try {
+            await Audio
+              .setAudioModeAsync({
+                playsInSilentModeIOS:
+                  true,
 
-          const { sound } =
-            await Audio.Sound.createAsync(
-              require(
-                "../assets/sounds/audio_inicio.mp3"
-              ),
-              {
-                shouldPlay: true,
-                isLooping: true,
-                volume:
-                  soundEnabledRef.current
-                    ? 1
-                    : 0,
-              }
+                staysActiveInBackground:
+                  false,
+
+                shouldDuckAndroid:
+                  true,
+              });
+
+            const { sound } =
+              await Audio.Sound
+                .createAsync(
+                  require(
+                    "../assets/sounds/audio_inicio.mp3"
+                  ),
+                  {
+                    shouldPlay: true,
+                    isLooping: true,
+
+                    volume:
+                      soundEnabledRef
+                        .current
+                        ? 1
+                        : 0,
+                  }
+                );
+
+            if (!pantallaActiva) {
+              await sound
+                .unloadAsync();
+
+              return;
+            }
+
+            sonidoCreado = sound;
+            soundRef.current = sound;
+          } catch (error) {
+            console.warn(
+              "Error cargando audio:",
+              error
             );
-
-          if (!pantallaActiva) {
-            await sound.unloadAsync();
-            return;
           }
-
-          sonidoCreado = sound;
-          soundRef.current = sound;
-        } catch (error) {
-          console.warn(
-            "Error cargando audio:",
-            error
-          );
-        }
-      };
+        };
 
       cargarMusica();
 
@@ -189,129 +236,166 @@ export default function HomeScreen({
         pantallaActiva = false;
 
         const sonido =
-          sonidoCreado || soundRef.current;
+          sonidoCreado ||
+          soundRef.current;
 
         soundRef.current = null;
 
         if (sonido) {
-          const detenerAudio = async () => {
-            try {
-              await sonido.stopAsync();
-              await sonido.unloadAsync();
-            } catch (error) {
-              console.warn(
-                "No se pudo detener el audio:",
-                error
-              );
-            }
-          };
+          const detenerAudio =
+            async () => {
+              try {
+                await sonido
+                  .stopAsync();
+
+                await sonido
+                  .unloadAsync();
+              } catch (error) {
+                console.warn(
+                  "No se pudo detener el audio:",
+                  error
+                );
+              }
+            };
 
           detenerAudio();
         }
 
-        if (Platform.OS === "android") {
-          NavigationBar.setVisibilityAsync(
-            "visible"
-          ).catch(() => {});
+        if (
+          Platform.OS === "android"
+        ) {
+          NavigationBar
+            .setVisibilityAsync(
+              "visible"
+            )
+            .catch(() => {});
         }
       };
     }, [])
   );
 
-  const abrirFormularioNombre = () => {
-    setNombreTemporal(nombreGuardado);
-    setModalVisible(true);
-  };
-
-  const cerrarFormularioNombre = () => {
-    setNombreTemporal(nombreGuardado);
-    setModalVisible(false);
-  };
-
-  const guardarNombre = async () => {
-    const nombreLimpio =
-      nombreTemporal.trim();
-
-    if (!nombreLimpio) {
-      Alert.alert(
-        "Nombre requerido",
-        "Escribe tu nombre antes de guardar."
+  const abrirFormularioNombre =
+    () => {
+      setNombreTemporal(
+        nombreGuardado
       );
 
-      return;
-    }
+      setModalVisible(true);
+    };
 
-    try {
-      await AsyncStorage.setItem(
-        CLAVE_NOMBRE,
-        nombreLimpio
+  const cerrarFormularioNombre =
+    () => {
+      setNombreTemporal(
+        nombreGuardado
       );
 
-      setNombreGuardado(nombreLimpio);
-      setNombreTemporal(nombreLimpio);
       setModalVisible(false);
-    } catch (error) {
-      console.warn(
-        "No se pudo guardar el nombre:",
-        error
-      );
+    };
 
-      Alert.alert(
-        "Error",
-        "No se pudo guardar el nombre."
-      );
-    }
-  };
+  const guardarNombre =
+    async () => {
+      const nombreLimpio =
+        nombreTemporal.trim();
+
+      if (!nombreLimpio) {
+        Alert.alert(
+          "Nombre requerido",
+          "Escribe tu nombre antes de guardar."
+        );
+
+        return;
+      }
+
+      try {
+        await AsyncStorage.setItem(
+          CLAVE_NOMBRE,
+          nombreLimpio
+        );
+
+        setNombreGuardado(
+          nombreLimpio
+        );
+
+        setNombreTemporal(
+          nombreLimpio
+        );
+
+        setModalVisible(false);
+      } catch (error) {
+        console.warn(
+          "No se pudo guardar el nombre:",
+          error
+        );
+
+        Alert.alert(
+          "Error",
+          "No se pudo guardar el nombre."
+        );
+      }
+    };
 
   const handlePlay = () => {
     if (
       confettiLeftRef.current &&
       confettiRightRef.current
     ) {
-      confettiLeftRef.current.start();
-      confettiRightRef.current.start();
+      confettiLeftRef.current
+        .start();
+
+      confettiRightRef.current
+        .start();
     }
 
     setTimeout(() => {
-    navigation.replace("Game", {
-      partidaId: Date.now(),
-    });
+      navigation.replace(
+        "Game",
+        {
+          partidaId: Date.now(),
+        }
+      );
     }, 800);
   };
 
-  const handleSound = async () => {
-    if (!soundRef.current) {
-      return;
-    }
+  const handleSound =
+    async () => {
+      if (!soundRef.current) {
+        return;
+      }
 
-    const nuevoEstado = !soundEnabled;
+      const nuevoEstado =
+        !soundEnabled;
 
-    try {
-      await soundRef.current.setVolumeAsync(
-        nuevoEstado ? 1 : 0
-      );
+      try {
+        await soundRef.current
+          .setVolumeAsync(
+            nuevoEstado ? 1 : 0
+          );
 
-      soundEnabledRef.current =
-        nuevoEstado;
+        soundEnabledRef.current =
+          nuevoEstado;
 
-      setSoundEnabled(nuevoEstado);
-    } catch (error) {
-      console.warn(
-        "No se pudo cambiar el sonido:",
-        error
-      );
-    }
-  };
+        setSoundEnabled(
+          nuevoEstado
+        );
+      } catch (error) {
+        console.warn(
+          "No se pudo cambiar el sonido:",
+          error
+        );
+      }
+    };
 
   const handleSettings = () => {
     Alert.alert(
       "Cómo jugar",
+
       "Ayuda a los animales a encontrar la cantidad correcta de frutas.\n\n" +
         "1. Observa el animal.\n" +
         "2. Revisa cuántas frutas necesita.\n" +
         "3. Presiona únicamente las frutas correctas.\n" +
         "4. Continúa hasta completar la cantidad solicitada.\n\n" +
         "Cuando termines los cinco niveles, llegarás a la fiesta.",
+
       [
         {
           text: "Entendido",
@@ -322,7 +406,9 @@ export default function HomeScreen({
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={styles.container}
+    >
       <ImageBackground
         source={require(
           "../assets/background.png"
@@ -330,43 +416,90 @@ export default function HomeScreen({
         resizeMode="cover"
         style={styles.background}
       >
-       <View style={styles.nameButtonWrapper}>
-  <Pressable
-    onPress={abrirFormularioNombre}
-    style={({ pressed }) => [
-      styles.botonNombre,
-      pressed &&
-        styles.botonNombrePresionado,
-    ]}
-  >
-      <Text style={styles.textoBotonNombre}>
-        {nombreGuardado
-          ? "Cambiar nombre"
-          : "Escribe tu nombre"}
-      </Text>
-    </Pressable>
+        <View
+          style={
+            styles.nameButtonWrapper
+          }
+        >
+          <Pressable
+            onPress={
+              abrirFormularioNombre
+            }
+            accessibilityRole="button"
+            accessibilityLabel={
+              nombreGuardado
+                ? "Cambiar tu nombre"
+                : "Escribe tu nombre"
+            }
+            style={({
+              pressed,
+            }) => [
+              styles.botonNombreImagen,
 
-    {nombreGuardado ? (
-      <Text
-        style={styles.nombreActual}
-        numberOfLines={1}
-      >
-        {nombreGuardado}
-      </Text>
-    ) : null}
-  </View>
+              pressed &&
+                styles.botonImagenPresionado,
+            ]}
+          >
+            <Image
+              source={
+                nombreGuardado
+                  ? require(
+                      "../assets/botton/BtnCambiarNombre.png"
+                    )
+                  : require(
+                      "../assets/botton/BtnEscribeNombre.png"
+                    )
+              }
+              style={
+                styles.imagenBotonNombre
+              }
+              resizeMode="contain"
+            />
+          </Pressable>
 
-        <View style={styles.logoContainer}>
+          {nombreGuardado ? (
+            <View
+              style={
+                styles.tarjetaNombreActual
+              }
+            >
+              <Text
+                style={
+                  styles.etiquetaNombre
+                }
+              >
+                JUGADOR
+              </Text>
+
+              <Text
+                style={
+                  styles.nombreActual
+                }
+                numberOfLines={1}
+              >
+                {nombreGuardado}
+              </Text>
+            </View>
+          ) : null}
+        </View>
+
+        <View
+          style={
+            styles.logoContainer
+          }
+        >
           <Animated.Image
             source={require(
               "../assets/logo/titulo_logo.png"
             )}
             style={[
               styles.logo,
+
               {
                 transform: [
                   {
-                    translateY: floatAnim,
+                    translateY:
+                      floatAnim,
                   },
                 ],
               },
@@ -375,9 +508,15 @@ export default function HomeScreen({
           />
         </View>
 
-        <View style={styles.centerContainer}>
+        <View
+          style={
+            styles.centerContainer
+          }
+        >
           <View
-            style={styles.playButtonWrapper}
+            style={
+              styles.playButtonWrapper
+            }
           >
             <PlayButton
               onPress={handlePlay}
@@ -385,26 +524,36 @@ export default function HomeScreen({
           </View>
 
           <View
-            style={styles.animalsContainer}
+            style={
+              styles.animalsContainer
+            }
           >
             <Image
               source={require(
                 "../assets/animals_background.png"
               )}
-              style={styles.animalsImage}
+              style={
+                styles.animalsImage
+              }
               resizeMode="contain"
             />
           </View>
         </View>
 
-        <View style={styles.footerContainer}>
+        <View
+          style={
+            styles.footerContainer
+          }
+        >
           <SoundButton
             onPress={handleSound}
             active={soundEnabled}
           />
 
           <SettingsButton
-            onPress={handleSettings}
+            onPress={
+              handleSettings
+            }
           />
         </View>
 
@@ -431,11 +580,16 @@ export default function HomeScreen({
         <ConfettiCannon
           count={55}
           origin={{
-            x: SCREEN_WIDTH + 20,
+            x:
+              SCREEN_WIDTH +
+              20,
+
             y: 300,
           }}
           autoStart={false}
-          ref={confettiRightRef}
+          ref={
+            confettiRightRef
+          }
           fadeOut
           fallSpeed={2500}
           explosionSpeed={300}
@@ -458,7 +612,9 @@ export default function HomeScreen({
           }
         >
           <KeyboardAvoidingView
-            style={styles.fondoModal}
+            style={
+              styles.fondoModal
+            }
             behavior={
               Platform.OS === "ios"
                 ? "padding"
@@ -466,17 +622,23 @@ export default function HomeScreen({
             }
           >
             <Pressable
-              style={styles.capaModal}
+              style={
+                styles.capaModal
+              }
               onPress={
                 cerrarFormularioNombre
               }
             />
 
             <View
-              style={styles.contenidoModal}
+              style={
+                styles.contenidoModal
+              }
             >
               <Text
-                style={styles.tituloModal}
+                style={
+                  styles.tituloModal
+                }
               >
                 {nombreGuardado
                   ? "Cambiar nombre"
@@ -488,13 +650,17 @@ export default function HomeScreen({
                   styles.descripcionModal
                 }
               >
-                Este nombre aparecerá al
-                finalizar el juego.
+                Este nombre aparecerá
+                al finalizar el juego.
               </Text>
 
               <TextInput
-                style={styles.entradaNombre}
-                value={nombreTemporal}
+                style={
+                  styles.entradaNombre
+                }
+                value={
+                  nombreTemporal
+                }
                 onChangeText={
                   setNombreTemporal
                 }
@@ -514,19 +680,28 @@ export default function HomeScreen({
                   styles.contadorCaracteres
                 }
               >
-                {nombreTemporal.length}/20
+                {
+                  nombreTemporal.length
+                }
+                /20
               </Text>
 
               <View
-                style={styles.botonesModal}
+                style={
+                  styles.botonesModal
+                }
               >
                 <Pressable
                   onPress={
                     cerrarFormularioNombre
                   }
-                  style={({ pressed }) => [
+                  style={({
+                    pressed,
+                  }) => [
                     styles.botonModal,
+
                     styles.botonCancelar,
+
                     pressed &&
                       styles.botonModalPresionado,
                   ]}
@@ -541,10 +716,16 @@ export default function HomeScreen({
                 </Pressable>
 
                 <Pressable
-                  onPress={guardarNombre}
-                  style={({ pressed }) => [
+                  onPress={
+                    guardarNombre
+                  }
+                  style={({
+                    pressed,
+                  }) => [
                     styles.botonModal,
+
                     styles.botonGuardar,
+
                     pressed &&
                       styles.botonModalPresionado,
                   ]}
@@ -575,14 +756,19 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     height: "100%",
+
     alignItems: "center",
-    justifyContent: "space-between",
+
+    justifyContent:
+      "space-between",
   },
 
   logoContainer: {
     marginTop: 130,
     width: "80%",
+
     alignItems: "center",
+
     zIndex: 2,
   },
 
@@ -594,106 +780,128 @@ const styles = StyleSheet.create({
   centerContainer: {
     flex: 1,
     width: "100%",
+
     justifyContent: "center",
     alignItems: "center",
+
     position: "relative",
   },
 
   playButtonWrapper: {
     position: "absolute",
+
     top: -20,
+
     zIndex: 4,
   },
 
   nameButtonWrapper: {
-  position: "absolute",
-  top: Platform.OS === "android" ? 38 : 18,
-  left: 18,
-  zIndex: 20,
-  alignItems: "flex-start",
-},
+    position: "absolute",
 
-tarjetaNombre: {
-  minWidth: 165,
-  maxWidth: 210,
-  paddingHorizontal: 16,
-  paddingVertical: 10,
-  marginBottom: 7,
-  borderRadius: 18,
-  borderWidth: 3,
-  borderColor: "#FF9800",
-  backgroundColor: "rgba(255, 255, 255, 0.97)",
-  alignItems: "flex-start",
-  elevation: 6,
+    top:
+      Platform.OS === "android"
+        ? 10
+        : -5,
 
-  shadowColor: "#000000",
-  shadowOffset: {
-    width: 0,
-    height: 3,
+    left: -13,
+
+    zIndex: 20,
+
+    alignItems:
+      "flex-start",
   },
-  shadowOpacity: 0.22,
-  shadowRadius: 5,
-},
 
-saludoNombre: {
-  color: "#F57C00",
-  fontSize: 11,
-  fontWeight: "900",
-  letterSpacing: 2,
-},
+  botonNombreImagen: {
+    width: Math.min(
+      SCREEN_WIDTH * 0.73,
+      310
+    ),
 
-nombreActual: {
-  maxWidth: 180,
-  marginTop: 1,
-  color: "#2E7D32",
-  fontSize: 19,
-  lineHeight: 23,
-  fontWeight: "900",
-  textAlign: "left",
-},
+    aspectRatio:
+      750 / 217,
 
-botonNombre: {
-  minWidth: 145,
-  minHeight: 40,
-  paddingHorizontal: 15,
-  paddingVertical: 7,
-  borderRadius: 14,
-  borderWidth: 3,
-  borderColor: "#2E7D32",
-  backgroundColor: "#4CAF50",
-  justifyContent: "center",
-  alignItems: "center",
-  elevation: 5,
-
-  shadowColor: "#000000",
-  shadowOffset: {
-    width: 0,
-    height: 2,
+    justifyContent: "center",
+    alignItems: "center",
   },
-  shadowOpacity: 0.2,
-  shadowRadius: 4,
-},
 
-botonNombrePresionado: {
-  transform: [
-    {
-      scale: 0.96,
+  imagenBotonNombre: {
+    width: "90%",
+    height: "100%",
+    left: -12,
+  },
+
+  botonImagenPresionado: {
+    opacity: 0.82,
+
+    transform: [
+      {
+        scale: 0.96,
+      },
+    ],
+  },
+
+  tarjetaNombreActual: {
+    minWidth: 150,
+    maxWidth: 235,
+
+    marginTop: -10,
+    marginLeft: 20,
+
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+
+    borderRadius: 15,
+    borderWidth: 3,
+
+    borderColor: "#85b1f1",
+
+    backgroundColor:
+      "rgba(255, 255, 255, 0.97)",
+
+    elevation: 5,
+
+    shadowColor: "#000000",
+
+    shadowOffset: {
+      width: 0,
+      height: 2,
     },
-  ],
-  opacity: 0.85,
-},
 
-textoBotonNombre: {
-  color: "#FFFFFF",
-  fontSize: 14,
-  fontWeight: "900",
-  textAlign: "center",
-},
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+
+  etiquetaNombre: {
+    color: "#4E9A24",
+
+    fontSize: 10,
+    fontWeight: "900",
+
+    letterSpacing: 1.5,
+  },
+
+  nombreActual: {
+    maxWidth: 200,
+
+    marginTop: 1,
+
+    color: "#10285B",
+
+    fontSize: 17,
+    lineHeight: 21,
+    fontWeight: "900",
+
+    textAlign: "left",
+  },
+
   animalsContainer: {
     width: "100%",
+
     alignItems: "center",
     justifyContent: "center",
+
     marginTop: 190,
+
     zIndex: 2,
   },
 
@@ -704,17 +912,25 @@ textoBotonNombre: {
 
   footerContainer: {
     flexDirection: "row",
+
     width: "100%",
-    justifyContent: "space-between",
+
+    justifyContent:
+      "space-between",
+
     paddingHorizontal: 25,
     marginBottom: 30,
+
     zIndex: 3,
   },
 
   fondoModal: {
     flex: 1,
+
     paddingHorizontal: 24,
+
     justifyContent: "center",
+
     backgroundColor:
       "rgba(0, 0, 0, 0.55)",
   },
@@ -726,63 +942,85 @@ textoBotonNombre: {
   contenidoModal: {
     width: "100%",
     maxWidth: 420,
+
     alignSelf: "center",
+
     padding: 24,
+
     borderRadius: 25,
     borderWidth: 4,
+
     borderColor: "#4CAF50",
+
     backgroundColor: "#FFFFFF",
+
     elevation: 10,
 
     shadowColor: "#000000",
+
     shadowOffset: {
       width: 0,
       height: 4,
     },
+
     shadowOpacity: 0.25,
     shadowRadius: 8,
   },
 
   tituloModal: {
     color: "#2E7D32",
+
     fontSize: 25,
     fontWeight: "900",
+
     textAlign: "center",
   },
 
   descripcionModal: {
     marginTop: 8,
     marginBottom: 18,
+
     color: "#555555",
+
     fontSize: 15,
     lineHeight: 21,
     fontWeight: "600",
+
     textAlign: "center",
   },
 
   entradaNombre: {
     width: "100%",
     minHeight: 56,
+
     paddingHorizontal: 16,
+
     borderWidth: 2,
     borderColor: "#BDBDBD",
     borderRadius: 15,
+
     backgroundColor: "#FFFDF7",
+
     color: "#333333",
+
     fontSize: 18,
     fontWeight: "700",
   },
 
   contadorCaracteres: {
     marginTop: 5,
+
     color: "#777777",
+
     fontSize: 12,
     fontWeight: "600",
+
     textAlign: "right",
   },
 
   botonesModal: {
     flexDirection: "row",
+
     gap: 12,
     marginTop: 20,
   },
@@ -790,7 +1028,9 @@ textoBotonNombre: {
   botonModal: {
     flex: 1,
     minHeight: 50,
+
     borderRadius: 15,
+
     justifyContent: "center",
     alignItems: "center",
   },
@@ -798,32 +1038,37 @@ textoBotonNombre: {
   botonCancelar: {
     borderWidth: 2,
     borderColor: "#BDBDBD",
+
     backgroundColor: "#F1F1F1",
   },
 
   botonGuardar: {
     borderWidth: 2,
     borderColor: "#2E7D32",
+
     backgroundColor: "#4CAF50",
   },
 
   botonModalPresionado: {
+    opacity: 0.85,
+
     transform: [
       {
         scale: 0.97,
       },
     ],
-    opacity: 0.85,
   },
 
   textoCancelar: {
     color: "#424242",
+
     fontSize: 16,
     fontWeight: "800",
   },
 
   textoGuardar: {
     color: "#FFFFFF",
+
     fontSize: 16,
     fontWeight: "900",
   },
