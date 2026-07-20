@@ -1,18 +1,32 @@
-import React, { useEffect, useRef } from "react";
-import { Animated, TouchableOpacity, StyleSheet, Image } from "react-native";
+import React, {
+  memo,
+  useEffect,
+  useRef,
+} from "react";
 
-export default function PlayButton({ onPress }) {
-  const scaleAnim = useRef(new Animated.Value(1)).current;
+import {
+  Animated,
+  Pressable,
+  StyleSheet,
+} from "react-native";
+
+import { Image as ExpoImage } from "expo-image";
+
+function PlayButton({ onPress }) {
+  const escalaAnimada = useRef(
+    new Animated.Value(1)
+  ).current;
 
   useEffect(() => {
-    const animation = Animated.loop(
+    const animacion = Animated.loop(
       Animated.sequence([
-        Animated.timing(scaleAnim, {
+        Animated.timing(escalaAnimada, {
           toValue: 1.08,
           duration: 700,
           useNativeDriver: true,
         }),
-        Animated.timing(scaleAnim, {
+
+        Animated.timing(escalaAnimada, {
           toValue: 1,
           duration: 700,
           useNativeDriver: true,
@@ -20,34 +34,80 @@ export default function PlayButton({ onPress }) {
       ])
     );
 
-    animation.start();
-    return () => animation.stop();
-  }, [scaleAnim]);
+    animacion.start();
+
+    return () => {
+      animacion.stop();
+      escalaAnimada.stopAnimation();
+      escalaAnimada.setValue(1);
+    };
+  }, [escalaAnimada]);
+
+  const manejarPresion = () => {
+    if (typeof onPress === "function") {
+      onPress();
+    }
+  };
 
   return (
-    <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
-      <TouchableOpacity 
-        activeOpacity={0.8} 
-        onPress={onPress} 
-        style={styles.button}
+    <Animated.View
+      style={[
+        styles.contenedor,
+        {
+          transform: [
+            {
+              scale: escalaAnimada,
+            },
+          ],
+        },
+      ]}
+    >
+      <Pressable
+        onPress={manejarPresion}
+        accessibilityRole="button"
+        accessibilityLabel="Comenzar el juego"
+        style={({ pressed }) => [
+          styles.boton,
+
+          pressed &&
+            styles.botonPresionado,
+        ]}
       >
-        <Image
-          source={require("../../assets/botton/play_btn.png")}
-          style={styles.image}
-          resizeMode="contain"
+        <ExpoImage
+          source={require(
+            "../../assets/botton/play_btn.png"
+          )}
+          style={styles.imagen}
+          contentFit="contain"
+          cachePolicy="memory-disk"
+          priority="high"
         />
-      </TouchableOpacity>
+      </Pressable>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
-  button: {
+  contenedor: {
+    width: 355,
+    height: 355,
+  },
+
+  boton: {
+    width: "100%",
+    height: "100%",
     justifyContent: "center",
     alignItems: "center",
   },
-  image: {
-    width: 300,  // ¡Aumentado para que sea grande y llamativo!
-    height: 350, // Proporción perfecta para el botón principal
+
+  botonPresionado: {
+    opacity: 0.8,
+  },
+
+  imagen: {
+    width: "100%",
+    height: "100%",
   },
 });
+
+export default memo(PlayButton);

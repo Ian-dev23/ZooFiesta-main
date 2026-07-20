@@ -1,44 +1,73 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
+
 import {
+  Platform,
   SafeAreaView,
   StyleSheet,
   View,
-  Image,
-  Dimensions,
-  Platform,
 } from "react-native";
+
+import { Image as ExpoImage } from "expo-image";
 import * as NavigationBar from "expo-navigation-bar";
-import ConfettiCannon from "react-native-confetti-cannon";
 
-const { width, height } = Dimensions.get("window");
-
-export default function SplashScreen({ navigation }) {
-  const confettiLeftRef = useRef(null);
-  const confettiRightRef = useRef(null);
-
+export default function SplashScreen({
+  navigation,
+}) {
   useEffect(() => {
-    // Ocultar botones del sistema
-    if (Platform.OS === "android") {
-      NavigationBar.setBehaviorAsync("overlay-swipe");
-      NavigationBar.setVisibilityAsync("hidden");
-    }
+    let pantallaActiva = true;
 
-    // Espera 2 segundos y luego navega a HomeScreen
+    const prepararPantalla = async () => {
+      if (Platform.OS === "android") {
+        try {
+          await NavigationBar.setBehaviorAsync(
+            "overlay-swipe"
+          );
+
+          await NavigationBar.setVisibilityAsync(
+            "hidden"
+          );
+        } catch (error) {
+          console.warn(
+            "No se pudo ocultar la barra de navegación:",
+            error
+          );
+        }
+      }
+    };
+
+    prepararPantalla();
+
     const timer = setTimeout(() => {
-      navigation.replace("Home");
+      if (pantallaActiva) {
+        navigation.reset({
+        index: 0,
+        routes: [
+          {
+            name: "Home",
+          },
+        ],
+      });
+      }
     }, 2000);
 
-    return () => clearTimeout(timer);
+    return () => {
+      pantallaActiva = false;
+      clearTimeout(timer);
+    };
   }, [navigation]);
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        {/* Logo/Imagen del splash */}
-        <Image
-          source={require("../assets/logo/titulo_logo.png")}
+        <ExpoImage
+          source={require(
+            "../assets/logo/titulo_logo.png"
+          )}
           style={styles.logo}
-          resizeMode="contain"
+          contentFit="contain"
+          cachePolicy="memory-disk"
+          transition={150}
+          priority="high"
         />
       </View>
     </SafeAreaView>
@@ -49,15 +78,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#000000",
-    justifyContent: "center",
-    alignItems: "center",
   },
+
   content: {
+    flex: 1,
+    width: "100%",
     justifyContent: "center",
     alignItems: "center",
-    width: "100%",
-    height: "100%",
   },
+
   logo: {
     width: 200,
     height: 200,

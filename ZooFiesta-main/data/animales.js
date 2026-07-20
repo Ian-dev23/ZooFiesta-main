@@ -1,123 +1,269 @@
 const TOTAL_OBJETOS = 12;
 
-const FONDOS = {
-  conejo: require("../assets/backgrounds/HabitatConejo.png"),
-  mono: require("../assets/backgrounds/HabitatMono.png"),
-  elefante: require("../assets/backgrounds/HabitatElefante.png"),
-  jirafa: require("../assets/backgrounds/HabitatJirafa.png"),
-  oso: require("../assets/backgrounds/HabitatOso.png"),
-};
+/*
+ * Audios de error e inactividad
+ * correspondientes a cada animal.
+ */
+const AUDIOS = Object.freeze({
+  conejo: {
+    error: require(
+      "../assets/sounds/conejo/error.mp3"
+    ),
 
-const IMAGENES_ANIMALES = {
-  conejo: require("../assets/animals/Conejo.png"),
-  mono: require("../assets/animals/mono.png"),
-  elefante: require("../assets/animals/elefante.png"),
-  jirafa: require("../assets/animals/jirafa.png"),
-  oso: require("../assets/animals/oso.png"),
-};
+    inactividad: require(
+      "../assets/sounds/conejo/inactividad.mp3"
+    ),
+  },
 
-const OBJETOS = {
+  mono: {
+    error: require(
+      "../assets/sounds/mono/error.mp3"
+    ),
+
+    inactividad: require(
+      "../assets/sounds/mono/inactividad.mp3"
+    ),
+  },
+
+  elefante: {
+    error: require(
+      "../assets/sounds/elefante/error.mp3"
+    ),
+
+    inactividad: require(
+      "../assets/sounds/elefante/inactividad.mp3"
+    ),
+  },
+
+  jirafa: {
+    error: require(
+      "../assets/sounds/jirafa/error.mp3"
+    ),
+
+    inactividad: require(
+      "../assets/sounds/jirafa/inactividad.mp3"
+    ),
+  },
+
+  oso: {
+    error: require(
+      "../assets/sounds/oso/error.mp3"
+    ),
+
+    inactividad: require(
+      "../assets/sounds/oso/inactividad.mp3"
+    ),
+  },
+});
+
+/*
+ * Fondos de cada nivel.
+ */
+const FONDOS = Object.freeze({
+  conejo: require(
+    "../assets/backgrounds/HabitatConejo.png"
+  ),
+
+  mono: require(
+    "../assets/backgrounds/HabitatMono.png"
+  ),
+
+  elefante: require(
+    "../assets/backgrounds/HabitatElefante.png"
+  ),
+
+  jirafa: require(
+    "../assets/backgrounds/HabitatJirafa.png"
+  ),
+
+  oso: require(
+    "../assets/backgrounds/HabitatOso.png"
+  ),
+});
+
+/*
+ * Imágenes principales de los animales.
+ */
+const IMAGENES_ANIMALES = Object.freeze({
+  conejo: require(
+    "../assets/animals/Conejo.png"
+  ),
+
+  mono: require(
+    "../assets/animals/mono.png"
+  ),
+
+  elefante: require(
+    "../assets/animals/elefante.png"
+  ),
+
+  jirafa: require(
+    "../assets/animals/jirafa.png"
+  ),
+
+  oso: require(
+    "../assets/animals/oso.png"
+  ),
+});
+
+/*
+ * Objetos disponibles en el juego.
+ */
+const OBJETOS = Object.freeze({
   zanahoria: {
     singular: "zanahoria",
     plural: "zanahorias",
+
     articuloIndefinido: "una",
     articuloPlural: "las",
+
     pronombreSingular: "la",
     pronombrePlural: "las",
-    imagen: require("../assets/objects/zanahoria.png"),
+
+    imagen: require(
+      "../assets/objects/zanahoria.png"
+    ),
   },
 
   lechuga: {
     singular: "lechuga",
     plural: "lechugas",
+
     articuloIndefinido: "una",
     articuloPlural: "las",
+
     pronombreSingular: "la",
     pronombrePlural: "las",
-    imagen: require("../assets/objects/lechuga.png"),
+
+    imagen: require(
+      "../assets/objects/lechuga.png"
+    ),
   },
 
   platano: {
     singular: "plátano",
     plural: "plátanos",
+
     articuloIndefinido: "un",
     articuloPlural: "los",
+
     pronombreSingular: "lo",
     pronombrePlural: "los",
-    imagen: require("../assets/objects/platano.png"),
+
+    imagen: require(
+      "../assets/objects/platano.png"
+    ),
   },
 
   sandia: {
     singular: "sandía",
     plural: "sandías",
+
     articuloIndefinido: "una",
     articuloPlural: "las",
+
     pronombreSingular: "la",
     pronombrePlural: "las",
-    imagen: require("../assets/objects/sandia.png"),
+
+    imagen: require(
+      "../assets/objects/sandia.png"
+    ),
   },
 
   maiz: {
     singular: "mazorca de maíz",
     plural: "mazorcas de maíz",
+
     articuloIndefinido: "una",
     articuloPlural: "las",
+
     pronombreSingular: "la",
     pronombrePlural: "las",
-    imagen: require("../assets/objects/maiz.png"),
+
+    imagen: require(
+      "../assets/objects/maiz.png"
+    ),
   },
 
   manzana: {
     singular: "manzana",
     plural: "manzanas",
+
     articuloIndefinido: "una",
     articuloPlural: "las",
+
     pronombreSingular: "la",
     pronombrePlural: "las",
-    imagen: require("../assets/objects/manzana.png"),
+
+    imagen: require(
+      "../assets/objects/manzana.png"
+    ),
   },
 
   pera: {
     singular: "pera",
     plural: "peras",
+
     articuloIndefinido: "una",
     articuloPlural: "las",
+
     pronombreSingular: "la",
     pronombrePlural: "las",
-    imagen: require("../assets/objects/pera.png"),
+
+    imagen: require(
+      "../assets/objects/pera.png"
+    ),
   },
 
   uva: {
     singular: "uva",
     plural: "uvas",
+
     articuloIndefinido: "una",
     articuloPlural: "las",
+
     pronombreSingular: "la",
     pronombrePlural: "las",
-    imagen: require("../assets/objects/uva.png"),
+
+    imagen: require(
+      "../assets/objects/uva.png"
+    ),
   },
 
   naranja: {
     singular: "naranja",
     plural: "naranjas",
+
     articuloIndefinido: "una",
     articuloPlural: "las",
+
     pronombreSingular: "la",
     pronombrePlural: "las",
-    imagen: require("../assets/objects/naranja.png"),
-  },
-};
 
-const configuraciones = [
+    imagen: require(
+      "../assets/objects/naranja.png"
+    ),
+  },
+});
+
+/*
+ * Configuración de los cinco niveles.
+ */
+const configuraciones = Object.freeze([
   {
     id: 1,
+
     nombre: "Conejo",
     presentacion: "el conejito",
 
-    imagenAnimal: IMAGENES_ANIMALES.conejo,
-    imagenFondo: FONDOS.conejo,
+    imagenAnimal:
+      IMAGENES_ANIMALES.conejo,
+
+    imagenFondo:
+      FONDOS.conejo,
 
     objetoBuscado: "zanahoria",
+
     cantidadMinima: 2,
     cantidadMaxima: 5,
 
@@ -128,18 +274,15 @@ const configuraciones = [
       "maiz",
     ],
 
-    audioError: null,
+    audioError:
+      AUDIOS.conejo.error,
+
+    audioInactividad:
+      AUDIOS.conejo.inactividad,
+
     audioCompletado: null,
 
     audiosIntroduccion: {
-      2: null,
-      3: null,
-      4: null,
-      5: null,
-    },
-
-    audiosRecordatorio: {
-      1: null,
       2: null,
       3: null,
       4: null,
@@ -149,13 +292,18 @@ const configuraciones = [
 
   {
     id: 2,
+
     nombre: "Mono",
     presentacion: "el monito",
 
-    imagenAnimal: IMAGENES_ANIMALES.mono,
-    imagenFondo: FONDOS.mono,
+    imagenAnimal:
+      IMAGENES_ANIMALES.mono,
+
+    imagenFondo:
+      FONDOS.mono,
 
     objetoBuscado: "platano",
+
     cantidadMinima: 3,
     cantidadMaxima: 6,
 
@@ -167,19 +315,15 @@ const configuraciones = [
       "naranja",
     ],
 
-    audioError: null,
+    audioError:
+      AUDIOS.mono.error,
+
+    audioInactividad:
+      AUDIOS.mono.inactividad,
+
     audioCompletado: null,
 
     audiosIntroduccion: {
-      3: null,
-      4: null,
-      5: null,
-      6: null,
-    },
-
-    audiosRecordatorio: {
-      1: null,
-      2: null,
       3: null,
       4: null,
       5: null,
@@ -189,13 +333,18 @@ const configuraciones = [
 
   {
     id: 3,
+
     nombre: "Elefante",
     presentacion: "el elefante",
 
-    imagenAnimal: IMAGENES_ANIMALES.elefante,
-    imagenFondo: FONDOS.elefante,
+    imagenAnimal:
+      IMAGENES_ANIMALES.elefante,
+
+    imagenFondo:
+      FONDOS.elefante,
 
     objetoBuscado: "manzana",
+
     cantidadMinima: 2,
     cantidadMaxima: 5,
 
@@ -207,18 +356,15 @@ const configuraciones = [
       "naranja",
     ],
 
-    audioError: null,
+    audioError:
+      AUDIOS.elefante.error,
+
+    audioInactividad:
+      AUDIOS.elefante.inactividad,
+
     audioCompletado: null,
 
     audiosIntroduccion: {
-      2: null,
-      3: null,
-      4: null,
-      5: null,
-    },
-
-    audiosRecordatorio: {
-      1: null,
       2: null,
       3: null,
       4: null,
@@ -228,13 +374,18 @@ const configuraciones = [
 
   {
     id: 4,
+
     nombre: "Jirafa",
     presentacion: "la jirafa",
 
-    imagenAnimal: IMAGENES_ANIMALES.jirafa,
-    imagenFondo: FONDOS.jirafa,
+    imagenAnimal:
+      IMAGENES_ANIMALES.jirafa,
+
+    imagenFondo:
+      FONDOS.jirafa,
 
     objetoBuscado: "pera",
+
     cantidadMinima: 4,
     cantidadMaxima: 7,
 
@@ -246,20 +397,15 @@ const configuraciones = [
       "naranja",
     ],
 
-    audioError: null,
+    audioError:
+      AUDIOS.jirafa.error,
+
+    audioInactividad:
+      AUDIOS.jirafa.inactividad,
+
     audioCompletado: null,
 
     audiosIntroduccion: {
-      4: null,
-      5: null,
-      6: null,
-      7: null,
-    },
-
-    audiosRecordatorio: {
-      1: null,
-      2: null,
-      3: null,
       4: null,
       5: null,
       6: null,
@@ -269,13 +415,18 @@ const configuraciones = [
 
   {
     id: 5,
+
     nombre: "Oso",
     presentacion: "el osito",
 
-    imagenAnimal: IMAGENES_ANIMALES.oso,
-    imagenFondo: FONDOS.oso,
+    imagenAnimal:
+      IMAGENES_ANIMALES.oso,
+
+    imagenFondo:
+      FONDOS.oso,
 
     objetoBuscado: "sandia",
+
     cantidadMinima: 2,
     cantidadMaxima: 4,
 
@@ -287,7 +438,12 @@ const configuraciones = [
       "naranja",
     ],
 
-    audioError: null,
+    audioError:
+      AUDIOS.oso.error,
+
+    audioInactividad:
+      AUDIOS.oso.inactividad,
+
     audioCompletado: null,
 
     audiosIntroduccion: {
@@ -295,34 +451,49 @@ const configuraciones = [
       3: null,
       4: null,
     },
-
-    audiosRecordatorio: {
-      1: null,
-      2: null,
-      3: null,
-      4: null,
-    },
   },
-];
+]);
 
-const obtenerNumeroAleatorio = (minimo, maximo) => {
+/*
+ * Obtiene un número entero aleatorio
+ * dentro del rango indicado.
+ */
+const obtenerNumeroAleatorio = (
+  minimo,
+  maximo
+) => {
   return (
-    Math.floor(Math.random() * (maximo - minimo + 1)) +
-    minimo
+    Math.floor(
+      Math.random() *
+        (maximo - minimo + 1)
+    ) + minimo
   );
 };
 
-const mezclarElementos = (elementos) => {
-  const resultado = [...elementos];
+/*
+ * Mezcla un arreglo sin modificar
+ * el arreglo original.
+ */
+const mezclarElementos = (
+  elementos
+) => {
+  const resultado = [
+    ...elementos,
+  ];
 
   for (
-    let posicion = resultado.length - 1;
+    let posicion =
+      resultado.length - 1;
+
     posicion > 0;
+
     posicion -= 1
   ) {
-    const posicionAleatoria = Math.floor(
-      Math.random() * (posicion + 1)
-    );
+    const posicionAleatoria =
+      Math.floor(
+        Math.random() *
+          (posicion + 1)
+      );
 
     [
       resultado[posicion],
@@ -336,68 +507,170 @@ const mezclarElementos = (elementos) => {
   return resultado;
 };
 
-const crearId = (nivelId, tipo, indice) => {
-  const parteAleatoria = Math.random()
-    .toString(36)
-    .slice(2, 9);
+/*
+ * Genera un identificador diferente
+ * para cada objeto de la cuadrícula.
+ */
+const crearId = (
+  nivelId,
+  tipo,
+  indice
+) => {
+  const parteAleatoria =
+    Math.random()
+      .toString(36)
+      .slice(2, 9);
 
-  return `${nivelId}-${tipo}-${indice}-${parteAleatoria}`;
+  return (
+    `${nivelId}-` +
+    `${tipo}-` +
+    `${indice}-` +
+    `${parteAleatoria}`
+  );
 };
 
+/*
+ * Obtiene un objeto del catálogo.
+ */
+const obtenerObjeto = (tipo) => {
+  const objeto = OBJETOS[tipo];
+
+  if (!objeto) {
+    throw new Error(
+      `El objeto "${tipo}" no existe en OBJETOS.`
+    );
+  }
+
+  return objeto;
+};
+
+/*
+ * Crea las frutas correctas.
+ */
 const crearObjetosCorrectos = (
   configuracion,
   cantidad,
   objeto
 ) => {
   return Array.from(
-    { length: cantidad },
+    {
+      length: cantidad,
+    },
+
     (_, indice) => ({
       id: crearId(
         configuracion.id,
         configuracion.objetoBuscado,
         indice
       ),
-      tipo: configuracion.objetoBuscado,
+
+      tipo:
+        configuracion.objetoBuscado,
+
+      nombreAccesible:
+        objeto.singular,
+
       correcto: true,
-      imagen: objeto.imagen,
+
+      imagen:
+        objeto.imagen,
     })
   );
 };
 
+/*
+ * Crea los objetos incorrectos
+ * que funcionan como distractores.
+ */
 const crearObjetosDistractores = (
   configuracion,
   cantidad
 ) => {
+  if (cantidad <= 0) {
+    return [];
+  }
+
+  if (
+    !Array.isArray(
+      configuracion.distractores
+    ) ||
+    configuracion.distractores
+      .length === 0
+  ) {
+    throw new Error(
+      `El nivel "${configuracion.nombre}" no tiene distractores.`
+    );
+  }
+
   const tiposDisponibles = [];
 
-  while (tiposDisponibles.length < cantidad) {
+  while (
+    tiposDisponibles.length <
+    cantidad
+  ) {
     tiposDisponibles.push(
-      ...mezclarElementos(configuracion.distractores)
+      ...mezclarElementos(
+        configuracion.distractores
+      )
     );
   }
 
   return tiposDisponibles
     .slice(0, cantidad)
-    .map((tipo, indice) => ({
-      id: crearId(
-        configuracion.id,
+    .map((tipo, indice) => {
+      const objeto =
+        obtenerObjeto(tipo);
+
+      return {
+        id: crearId(
+          configuracion.id,
+          tipo,
+          indice
+        ),
+
         tipo,
-        indice
-      ),
-      tipo,
-      correcto: false,
-      imagen: OBJETOS[tipo].imagen,
-    }));
+
+        nombreAccesible:
+          objeto.singular,
+
+        correcto: false,
+
+        imagen:
+          objeto.imagen,
+      };
+    });
 };
 
-export const crearNivelJugable = (configuracion) => {
-  const cantidad = obtenerNumeroAleatorio(
-    configuracion.cantidadMinima,
-    configuracion.cantidadMaxima
+/*
+ * Genera un nivel completo.
+ */
+export const crearNivelJugable = (
+  configuracion
+) => {
+  if (!configuracion) {
+    throw new Error(
+      "No se recibió una configuración para crear el nivel."
+    );
+  }
+
+  const objeto = obtenerObjeto(
+    configuracion.objetoBuscado
   );
 
-  const objeto =
-    OBJETOS[configuracion.objetoBuscado];
+  const cantidad =
+    obtenerNumeroAleatorio(
+      configuracion.cantidadMinima,
+      configuracion.cantidadMaxima
+    );
+
+  const cantidadDistractores =
+    TOTAL_OBJETOS - cantidad;
+
+  if (cantidadDistractores < 0) {
+    throw new Error(
+      `La cantidad del nivel "${configuracion.nombre}" supera el total de objetos.`
+    );
+  }
 
   const objetosCorrectos =
     crearObjetosCorrectos(
@@ -409,7 +682,7 @@ export const crearNivelJugable = (configuracion) => {
   const objetosDistractores =
     crearObjetosDistractores(
       configuracion,
-      TOTAL_OBJETOS - cantidad
+      cantidadDistractores
     );
 
   const nombreObjeto =
@@ -422,18 +695,31 @@ export const crearNivelJugable = (configuracion) => {
       ? objeto.pronombreSingular
       : objeto.pronombrePlural;
 
+  const audioIntroduccion =
+    configuracion
+      .audiosIntroduccion?.[
+        cantidad
+      ] ?? null;
+
   return {
     ...configuracion,
 
     cantidad,
 
-    // Mantiene el fondo asignado a cada animal.
-    imagenFondo: configuracion.imagenFondo,
+    imagenAnimal:
+      configuracion.imagenAnimal,
 
-    imagenObjetoBuscado: objeto.imagen,
-    imagenBotonAudio: null,
+    imagenFondo:
+      configuracion.imagenFondo,
 
-    objetoBuscadoPlural: objeto.plural,
+    imagenObjetoBuscado:
+      objeto.imagen,
+
+    objetoBuscadoSingular:
+      objeto.singular,
+
+    objetoBuscadoPlural:
+      objeto.plural,
 
     mensajeIntroduccion:
       `Hola, soy ${configuracion.presentacion}. ` +
@@ -441,19 +727,30 @@ export const crearNivelJugable = (configuracion) => {
       `a la fiesta. ¿Me ayudas a encontrar${pronombre}?`,
 
     mensajeError:
-      `Ups, eso no parece ${objeto.articuloIndefinido} ` +
-      `${objeto.singular}. Busca ${objeto.articuloPlural} ` +
-      `${objeto.plural}.`,
+      "Ups, esa no es la fruta que estamos buscando. " +
+      "Inténtalo nuevamente.",
+
+    mensajeInactividad:
+      "¿Seguimos jugando? " +
+      "Toca una fruta para continuar.",
 
     mensajeCompletado:
-      `Muy bien. Encontraste ${cantidad} ${nombreObjeto}.`,
+      `Muy bien. Encontraste ` +
+      `${cantidad} ${nombreObjeto}.`,
 
-    audioIntroduccion:
-      configuracion.audiosIntroduccion[cantidad] ??
+    audioIntroduccion,
+
+    audioError:
+      configuracion.audioError ??
       null,
 
-    audioRecordatorio:
-      configuracion.audiosRecordatorio,
+    audioInactividad:
+      configuracion
+        .audioInactividad ?? null,
+
+    audioCompletado:
+      configuracion
+        .audioCompletado ?? null,
 
     objetos: mezclarElementos([
       ...objetosCorrectos,
@@ -462,8 +759,25 @@ export const crearNivelJugable = (configuracion) => {
   };
 };
 
+/*
+ * Crea los cinco niveles
+ * de una partida.
+ */
 export const crearPartida = () => {
-  return configuraciones.map(crearNivelJugable);
+  return configuraciones.map(
+    (configuracion) =>
+      crearNivelJugable(
+        configuracion
+      )
+  );
+};
+
+export {
+  AUDIOS,
+  FONDOS,
+  IMAGENES_ANIMALES,
+  OBJETOS,
+  TOTAL_OBJETOS,
 };
 
 export default configuraciones;
