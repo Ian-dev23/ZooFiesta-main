@@ -1,12 +1,14 @@
 import React, {
   useCallback,
   useEffect,
+  useReducer,
   useRef,
   useState,
 } from "react";
 
 import {
   Animated,
+  FlatList,
   Image,
   ImageBackground,
   Platform,
@@ -22,89 +24,143 @@ import { Audio } from "expo-av";
 import { useFocusEffect } from "@react-navigation/native";
 import * as NavigationBar from "expo-navigation-bar";
 
-import animales from "../data/animales";
+import { crearPartida } from "../data/animales";
 
-const MUSICA_FONDO = require("../assets/sounds/audio_inicio.mp3");
-const FONDO_PREDETERMINADO = require("../assets/background.png");
+const MUSICA_FONDO = require(
+  "../assets/sounds/audio_inicio.mp3"
+);
 
 const VOLUMEN_MUSICA = 0.15;
 const VOLUMEN_MUSICA_MIENTRAS_HABLA = 0.03;
 const TIEMPO_RECORDATORIO = 40000;
 
-const esperar = (milisegundos) =>
-  new Promise((resolve) => setTimeout(resolve, milisegundos));
+const esperar = (milisegundos) => {
+  return new Promise((resolve) => {
+    setTimeout(resolve, milisegundos);
+  });
+};
 
-export default function GameScreen({ navigation }) {
-  const { width: screenWidth } = useWindowDimensions();
+const estadoInicial = {
+  nivelActual: 0,
+  seleccionados: [],
+  bloqueado: true,
+  mostrarAyuda: false,
+  nivelCompletado: false,
+};
 
-  const [nivelActual, setNivelActual] = useState(0);
-  const [objetosSeleccionados, setObjetosSeleccionados] = useState([]);
-  const [bloqueado, setBloqueado] = useState(false);
-  const [mostrarAyuda, setMostrarAyuda] = useState(false);
-  const [nivelCompletado, setNivelCompletado] = useState(false);
+function juegoReducer(estado, accion) {
+  switch (accion.type) {
+    case "INICIAR_NIVEL":
+      return {
+        ...estado,
+        seleccionados: [],
+        bloqueado: true,
+        mostrarAyuda: false,
+        nivelCompletado: false,
+      };
 
+    case "BLOQUEAR":
+      return {
+        ...estado,
+        bloqueado: true,
+      };
+
+    case "DESBLOQUEAR":
+      return {
+        ...estado,
+        bloqueado: false,
+      };
+
+    case "SELECCIONAR":
+      if (
+        estado.seleccionados.includes(
+          accion.id
+        )
+      ) {
+        return estado;
+      }
+
+      return {
+        ...estado,
+        seleccionados: [
+          ...estado.seleccionados,
+          accion.id,
+        ],
+      };
+
+    case "MOSTRAR_AYUDA":
+      return {
+        ...estado,
+        mostrarAyuda: true,
+      };
+
+    case "OCULTAR_AYUDA":
+      return {
+        ...estado,
+        mostrarAyuda: false,
+      };
+
+    case "COMPLETAR_NIVEL":
+      return {
+        ...estado,
+        bloqueado: true,
+        nivelCompletado: true,
+      };
+
+    case "SIGUIENTE_NIVEL":
+      return {
+        ...estadoInicial,
+        nivelActual:
+          estado.nivelActual + 1,
+      };
+
+    default:
+      return estado;
+  }
+}
+
+function useAudioJuego() {
   const musicaRef = useRef(null);
   const vozRef = useRef(null);
   const resolverVozRef = useRef(null);
 
-  const bloqueadoRef = useRef(false);
-  const pantallaActivaRef = useRef(false);
-
-  const recordatorioTimeoutRef = useRef(null);
-  const recordatorioTokenRef = useRef(0);
-  const programarRecordatorioRef = useRef(null);
-
-  const ayudaAnimada = useRef(new Animated.Value(1)).current;
-
-  const nivel = animales[nivelActual];
-  const cantidadEncontrada = objetosSeleccionados.length;
-
-  const anchoObjeto = Math.min(
-    (screenWidth - 48) / 4,
-    90
-  );
-
-  const actualizarBloqueado = useCallback((valor) => {
-    bloqueadoRef.current = valor;
-    setBloqueado(valor);
-  }, []);
-
-  const cambiarVolumenMusica = useCallback(
-    async (volumen) => {
+  const cambiarVolumenMusica =
+    useCallback(async (volumen) => {
       if (!musicaRef.current) {
         return;
       }
 
       try {
-        await musicaRef.current.setVolumeAsync(volumen);
+        await musicaRef.current.setVolumeAsync(
+          volumen
+        );
       } catch (error) {
         console.warn(
-          "No se pudo cambiar el volumen de la música:",
+          "No se pudo cambiar el volumen:",
           error
         );
       }
-    },
-    []
-  );
+    }, []);
 
-  const detenerMusica = useCallback(async () => {
-    const musica = musicaRef.current;
-    musicaRef.current = null;
+  const detenerMusica =
+    useCallback(async () => {
+      const musica = musicaRef.current;
+      musicaRef.current = null;
 
-    if (!musica) {
-      return;
-    }
+      if (!musica) {
+        return;
+      }
 
-    try {
-      await musica.stopAsync();
-      await musica.unloadAsync();
-    } catch (error) {
-      console.warn(
-        "No se pudo detener la música:",
-        error
-      );
-    }
-  }, []);
+      try {
+        await musica.stopAsync();
+        await musica.unloadAsync();
+      } catch (error) {
+        console.warn(
+          "No se pudo detener la música:",
+          error
+        );
+      }
+    }, []);
 
   const detenerVoz = useCallback(
     async (restaurarMusica = true) => {
@@ -118,7 +174,9 @@ export default function GameScreen({ navigation }) {
 
       if (voz) {
         try {
-          voz.setOnPlaybackStatusUpdate(null);
+          voz.setOnPlaybackStatusUpdate(
+            null
+          );
 
           await voz.stopAsync();
           await voz.unloadAsync();
@@ -139,28 +197,29 @@ export default function GameScreen({ navigation }) {
     [cambiarVolumenMusica]
   );
 
-  const iniciarMusica = useCallback(async () => {
-    await detenerMusica();
+  const iniciarMusica =
+    useCallback(async () => {
+      await detenerMusica();
 
-    try {
-      const { sound } =
-        await Audio.Sound.createAsync(
-          MUSICA_FONDO,
-          {
-            shouldPlay: true,
-            isLooping: true,
-            volume: VOLUMEN_MUSICA,
-          }
+      try {
+        const { sound } =
+          await Audio.Sound.createAsync(
+            MUSICA_FONDO,
+            {
+              shouldPlay: true,
+              isLooping: true,
+              volume: VOLUMEN_MUSICA,
+            }
+          );
+
+        musicaRef.current = sound;
+      } catch (error) {
+        console.warn(
+          "No se pudo iniciar la música:",
+          error
         );
-
-      musicaRef.current = sound;
-    } catch (error) {
-      console.warn(
-        "No se pudo iniciar la música:",
-        error
-      );
-    }
-  }, [detenerMusica]);
+      }
+    }, [detenerMusica]);
 
   const reproducirVoz = useCallback(
     async (archivoAudio) => {
@@ -174,90 +233,91 @@ export default function GameScreen({ navigation }) {
         VOLUMEN_MUSICA_MIENTRAS_HABLA
       );
 
-      await new Promise(async (resolve) => {
-        let promesaResuelta = false;
+      await new Promise(
+        async (resolve) => {
+          let finalizado = false;
 
-        const resolverPromesa = () => {
-          if (promesaResuelta) {
-            return;
-          }
+          const finalizar = () => {
+            if (finalizado) {
+              return;
+            }
 
-          promesaResuelta = true;
-          resolve();
-        };
+            finalizado = true;
+            resolve();
+          };
 
-        resolverVozRef.current = resolverPromesa;
+          resolverVozRef.current =
+            finalizar;
 
-        try {
-          const { sound } =
-            await Audio.Sound.createAsync(
-              archivoAudio,
-              {
-                shouldPlay: true,
-                volume: 1,
-              }
-            );
-
-          vozRef.current = sound;
-
-          sound.setOnPlaybackStatusUpdate(
-            async (status) => {
-              if (
-                !status.isLoaded ||
-                !status.didJustFinish
-              ) {
-                return;
-              }
-
-              sound.setOnPlaybackStatusUpdate(null);
-
-              if (vozRef.current === sound) {
-                vozRef.current = null;
-              }
-
-              if (
-                resolverVozRef.current ===
-                resolverPromesa
-              ) {
-                resolverVozRef.current = null;
-              }
-
-              try {
-                await sound.unloadAsync();
-              } catch (error) {
-                console.warn(
-                  "No se pudo descargar la voz:",
-                  error
-                );
-              }
-
-              await cambiarVolumenMusica(
-                VOLUMEN_MUSICA
+          try {
+            const { sound } =
+              await Audio.Sound.createAsync(
+                archivoAudio,
+                {
+                  shouldPlay: true,
+                  volume: 1,
+                }
               );
 
-              resolverPromesa();
-            }
-          );
-        } catch (error) {
-          console.warn(
-            "No se pudo reproducir la voz:",
-            error
-          );
+            vozRef.current = sound;
 
-          if (
-            resolverVozRef.current ===
-            resolverPromesa
-          ) {
-            resolverVozRef.current = null;
+            sound.setOnPlaybackStatusUpdate(
+              async (estadoAudio) => {
+                if (
+                  !estadoAudio.isLoaded ||
+                  !estadoAudio.didJustFinish
+                ) {
+                  return;
+                }
+
+                sound.setOnPlaybackStatusUpdate(
+                  null
+                );
+
+                if (
+                  vozRef.current === sound
+                ) {
+                  vozRef.current = null;
+                }
+
+                if (
+                  resolverVozRef.current ===
+                  finalizar
+                ) {
+                  resolverVozRef.current =
+                    null;
+                }
+
+                try {
+                  await sound.unloadAsync();
+                } catch (error) {
+                  console.warn(
+                    "No se pudo descargar la voz:",
+                    error
+                  );
+                }
+
+                await cambiarVolumenMusica(
+                  VOLUMEN_MUSICA
+                );
+
+                finalizar();
+              }
+            );
+          } catch (error) {
+            console.warn(
+              "No se pudo reproducir la voz:",
+              error
+            );
+
+            await cambiarVolumenMusica(
+              VOLUMEN_MUSICA
+            );
+
+            finalizar();
           }
-
-          await cambiarVolumenMusica(
-            VOLUMEN_MUSICA
-          );
-
-          resolverPromesa();
         }
-      });
+      );
     },
     [
       cambiarVolumenMusica,
@@ -265,127 +325,224 @@ export default function GameScreen({ navigation }) {
     ]
   );
 
-  const limpiarRecordatorio = useCallback(() => {
-    recordatorioTokenRef.current += 1;
+  return {
+    iniciarMusica,
+    detenerMusica,
+    reproducirVoz,
+    detenerVoz,
+  };
+}
 
-    if (recordatorioTimeoutRef.current) {
-      clearTimeout(recordatorioTimeoutRef.current);
-      recordatorioTimeoutRef.current = null;
+function useRecordatorioInactividad({
+  nivel,
+  pantallaActivaRef,
+  bloqueadoRef,
+  cambiarBloqueo,
+  reproducirVoz,
+}) {
+  const timeoutRef = useRef(null);
+  const tokenRef = useRef(0);
+  const programarRef = useRef(null);
+
+  const limpiar = useCallback(() => {
+    tokenRef.current += 1;
+
+    if (timeoutRef.current) {
+      clearTimeout(
+        timeoutRef.current
+      );
+
+      timeoutRef.current = null;
     }
   }, []);
 
-  const programarRecordatorio = useCallback(
+  const programar = useCallback(
     (cantidadPendiente) => {
-      limpiarRecordatorio();
+      limpiar();
+
+      const audio =
+        nivel.audioRecordatorio?.[
+          cantidadPendiente
+        ];
 
       if (
         cantidadPendiente <= 0 ||
-        !nivel.audioRecordatorio
+        !audio
       ) {
         return;
       }
 
-      const audioRecordatorio =
-        nivel.audioRecordatorio[cantidadPendiente];
-
-      if (!audioRecordatorio) {
-        return;
-      }
-
       const tokenActual =
-        recordatorioTokenRef.current;
+        tokenRef.current;
 
-      const intentarReproducirRecordatorio =
-        async () => {
-          if (
-            tokenActual !==
-              recordatorioTokenRef.current ||
-            !pantallaActivaRef.current
-          ) {
-            return;
-          }
+      const ejecutar = async () => {
+        if (
+          tokenActual !==
+            tokenRef.current ||
+          !pantallaActivaRef.current
+        ) {
+          return;
+        }
 
-          /*
-           * Si el animal ya está hablando por un error,
-           * presentación u otro mensaje, se espera un
-           * segundo para no interrumpir ese audio.
-           */
-          if (bloqueadoRef.current) {
-            recordatorioTimeoutRef.current =
-              setTimeout(
-                intentarReproducirRecordatorio,
-                1000
-              );
+        if (bloqueadoRef.current) {
+          timeoutRef.current =
+            setTimeout(
+              ejecutar,
+              1000
+            );
 
-            return;
-          }
+          return;
+        }
 
-          actualizarBloqueado(true);
+        cambiarBloqueo(true);
 
-          await reproducirVoz(audioRecordatorio);
+        await reproducirVoz(audio);
 
-          if (
-            tokenActual !==
-              recordatorioTokenRef.current ||
-            !pantallaActivaRef.current
-          ) {
-            return;
-          }
+        if (
+          tokenActual !==
+            tokenRef.current ||
+          !pantallaActivaRef.current
+        ) {
+          return;
+        }
 
-          actualizarBloqueado(false);
+        cambiarBloqueo(false);
 
-          /*
-           * Si continúa sin encontrar otra fruta,
-           * vuelve a recordarle después de 40 segundos.
-           */
-          programarRecordatorioRef.current?.(
-            cantidadPendiente
-          );
-        };
+        programarRef.current?.(
+          cantidadPendiente
+        );
+      };
 
-      recordatorioTimeoutRef.current =
+      timeoutRef.current =
         setTimeout(
-          intentarReproducirRecordatorio,
+          ejecutar,
           TIEMPO_RECORDATORIO
         );
     },
     [
-      actualizarBloqueado,
-      limpiarRecordatorio,
+      cambiarBloqueo,
+      limpiar,
       nivel.audioRecordatorio,
       reproducirVoz,
     ]
   );
 
   useEffect(() => {
-    programarRecordatorioRef.current =
-      programarRecordatorio;
-  }, [programarRecordatorio]);
+    programarRef.current = programar;
+  }, [programar]);
+
+  return {
+    programar,
+    limpiar,
+  };
+}
+
+export default function GameScreen({
+  navigation,
+}) {
+  const { width: screenWidth } =
+    useWindowDimensions();
+
+  const [niveles] = useState(() =>
+    crearPartida()
+  );
+
+  const [estado, dispatch] =
+    useReducer(
+      juegoReducer,
+      estadoInicial
+    );
+
+  const pantallaActivaRef =
+    useRef(false);
+
+  const bloqueadoRef =
+    useRef(true);
+
+  const seleccionadosRef =
+    useRef([]);
+
+  const partidaTerminadaRef =
+    useRef(false);
+
+  const ayudaAnimada = useRef(
+    new Animated.Value(1)
+  ).current;
+
+  const nivel =
+    niveles[estado.nivelActual];
+
+  const anchoObjeto = Math.min(
+    (screenWidth - 48) / 4,
+    90
+  );
+
+  const {
+    iniciarMusica,
+    detenerMusica,
+    reproducirVoz,
+    detenerVoz,
+  } = useAudioJuego();
+
+  const cambiarBloqueo =
+    useCallback((valor) => {
+      bloqueadoRef.current = valor;
+
+      dispatch({
+        type: valor
+          ? "BLOQUEAR"
+          : "DESBLOQUEAR",
+      });
+    }, []);
+
+  const {
+    programar:
+      programarRecordatorio,
+    limpiar:
+      limpiarRecordatorio,
+  } = useRecordatorioInactividad({
+    nivel,
+    pantallaActivaRef,
+    bloqueadoRef,
+    cambiarBloqueo,
+    reproducirVoz,
+  });
 
   useFocusEffect(
     useCallback(() => {
-      pantallaActivaRef.current = true;
+      pantallaActivaRef.current =
+        true;
 
-      const prepararAudio = async () => {
-        try {
-          await Audio.setAudioModeAsync({
-            playsInSilentModeIOS: true,
-            staysActiveInBackground: false,
-            shouldDuckAndroid: true,
-          });
+      const prepararAudio =
+        async () => {
+          try {
+            await Audio.setAudioModeAsync(
+              {
+                playsInSilentModeIOS:
+                  true,
+                staysActiveInBackground:
+                  false,
+                shouldDuckAndroid:
+                  true,
+              }
+            );
 
-          if (pantallaActivaRef.current) {
-            await iniciarMusica();
+            if (
+              pantallaActivaRef.current
+            ) {
+              await iniciarMusica();
+            }
+          } catch (error) {
+            console.warn(
+              "No se pudo configurar el audio:",
+              error
+            );
           }
-        } catch (error) {
-          console.warn(
-            "No se pudo configurar el audio:",
-            error
-          );
-        }
-      };
+        };
 
-      if (Platform.OS === "android") {
+      if (
+        Platform.OS === "android"
+      ) {
         NavigationBar.setBehaviorAsync(
           "overlay-swipe"
         ).catch(() => {});
@@ -398,13 +555,16 @@ export default function GameScreen({ navigation }) {
       prepararAudio();
 
       return () => {
-        pantallaActivaRef.current = false;
+        pantallaActivaRef.current =
+          false;
 
         limpiarRecordatorio();
         detenerVoz(false);
         detenerMusica();
 
-        if (Platform.OS === "android") {
+        if (
+          Platform.OS === "android"
+        ) {
           NavigationBar.setVisibilityAsync(
             "visible"
           ).catch(() => {});
@@ -423,38 +583,41 @@ export default function GameScreen({ navigation }) {
 
     limpiarRecordatorio();
 
-    setObjetosSeleccionados([]);
-    setMostrarAyuda(false);
-    setNivelCompletado(false);
+    seleccionadosRef.current = [];
+    bloqueadoRef.current = true;
 
-    actualizarBloqueado(true);
+    dispatch({
+      type: "INICIAR_NIVEL",
+    });
+
     ayudaAnimada.setValue(1);
 
-    const iniciarNivel = async () => {
-      await esperar(350);
+    const iniciarNivel =
+      async () => {
+        await esperar(350);
 
-      if (
-        !efectoActivo ||
-        !pantallaActivaRef.current
-      ) {
-        return;
-      }
+        if (
+          !efectoActivo ||
+          !pantallaActivaRef.current
+        ) {
+          return;
+        }
 
-      await reproducirVoz(
-        nivel.audioIntroduccion
-      );
-
-      if (
-        efectoActivo &&
-        pantallaActivaRef.current
-      ) {
-        actualizarBloqueado(false);
-
-        programarRecordatorio(
-          nivel.cantidad
+        await reproducirVoz(
+          nivel.audioIntroduccion
         );
-      }
-    };
+
+        if (
+          efectoActivo &&
+          pantallaActivaRef.current
+        ) {
+          cambiarBloqueo(false);
+
+          programarRecordatorio(
+            nivel.cantidad
+          );
+        }
+      };
 
     iniciarNivel();
 
@@ -463,8 +626,8 @@ export default function GameScreen({ navigation }) {
       limpiarRecordatorio();
     };
   }, [
-    actualizarBloqueado,
     ayudaAnimada,
+    cambiarBloqueo,
     limpiarRecordatorio,
     nivel.audioIntroduccion,
     nivel.cantidad,
@@ -475,58 +638,86 @@ export default function GameScreen({ navigation }) {
 
   const iluminarObjetosCorrectos =
     useCallback(async () => {
-      setMostrarAyuda(true);
-      ayudaAnimada.setValue(1);
-
-      await new Promise((resolve) => {
-        Animated.sequence([
-          Animated.timing(ayudaAnimada, {
-            toValue: 1.14,
-            duration: 220,
-            useNativeDriver: true,
-          }),
-
-          Animated.timing(ayudaAnimada, {
-            toValue: 1,
-            duration: 220,
-            useNativeDriver: true,
-          }),
-
-          Animated.timing(ayudaAnimada, {
-            toValue: 1.14,
-            duration: 220,
-            useNativeDriver: true,
-          }),
-
-          Animated.timing(ayudaAnimada, {
-            toValue: 1,
-            duration: 220,
-            useNativeDriver: true,
-          }),
-
-          Animated.timing(ayudaAnimada, {
-            toValue: 1.14,
-            duration: 220,
-            useNativeDriver: true,
-          }),
-
-          Animated.timing(ayudaAnimada, {
-            toValue: 1,
-            duration: 220,
-            useNativeDriver: true,
-          }),
-        ]).start(resolve);
+      dispatch({
+        type: "MOSTRAR_AYUDA",
       });
 
-      setMostrarAyuda(false);
+      ayudaAnimada.setValue(1);
+
+      await new Promise(
+        (resolve) => {
+          Animated.sequence([
+            Animated.timing(
+              ayudaAnimada,
+              {
+                toValue: 1.14,
+                duration: 220,
+                useNativeDriver:
+                  true,
+              }
+            ),
+
+            Animated.timing(
+              ayudaAnimada,
+              {
+                toValue: 1,
+                duration: 220,
+                useNativeDriver:
+                  true,
+              }
+            ),
+
+            Animated.timing(
+              ayudaAnimada,
+              {
+                toValue: 1.14,
+                duration: 220,
+                useNativeDriver:
+                  true,
+              }
+            ),
+
+            Animated.timing(
+              ayudaAnimada,
+              {
+                toValue: 1,
+                duration: 220,
+                useNativeDriver:
+                  true,
+              }
+            ),
+          ]).start(resolve);
+        }
+      );
+
+      dispatch({
+        type: "OCULTAR_AYUDA",
+      });
     }, [ayudaAnimada]);
 
-  const avanzarNivel = useCallback(
-    async () => {
-      limpiarRecordatorio();
+  const completarNivel =
+    useCallback(async () => {
+      if (
+        partidaTerminadaRef.current
+      ) {
+        return;
+      }
 
-      setNivelCompletado(true);
-      actualizarBloqueado(true);
+      limpiarRecordatorio();
+      cambiarBloqueo(true);
+
+      dispatch({
+        type: "COMPLETAR_NIVEL",
+      });
+
+      const esUltimoNivel =
+        estado.nivelActual >=
+        niveles.length - 1;
+
+      if (esUltimoNivel) {
+        partidaTerminadaRef.current =
+          true;
+      }
 
       await reproducirVoz(
         nivel.audioCompletado
@@ -534,97 +725,108 @@ export default function GameScreen({ navigation }) {
 
       await esperar(1400);
 
-      const esUltimoNivel =
-        nivelActual ===
-        animales.length - 1;
-
       if (esUltimoNivel) {
-        navigation.replace("Success");
+        navigation.reset({
+          index: 0,
+          routes: [
+            {
+              name: "Success",
+            },
+          ],
+        });
+
         return;
       }
 
-      setNivelActual(
-        (anterior) => anterior + 1
-      );
-    },
-    [
-      actualizarBloqueado,
+      seleccionadosRef.current = [];
+
+      dispatch({
+        type: "SIGUIENTE_NIVEL",
+      });
+    }, [
+      cambiarBloqueo,
+      estado.nivelActual,
       limpiarRecordatorio,
       navigation,
       nivel.audioCompletado,
-      nivelActual,
+      niveles.length,
       reproducirVoz,
-    ]
-  );
+    ]);
 
-  const seleccionarObjeto = async (
-    objeto
-  ) => {
-    if (
-      bloqueadoRef.current ||
-      nivelCompletado ||
-      objetosSeleccionados.includes(
-        objeto.id
-      )
-    ) {
-      return;
-    }
+  const seleccionarObjeto =
+    useCallback(
+      async (objeto) => {
+        if (
+          bloqueadoRef.current ||
+          estado.nivelCompletado ||
+          seleccionadosRef.current.includes(
+            objeto.id
+          )
+        ) {
+          return;
+        }
 
-    if (!objeto.correcto) {
-      actualizarBloqueado(true);
+        if (!objeto.correcto) {
+          cambiarBloqueo(true);
 
-      await Promise.all([
-        reproducirVoz(
-          nivel.audioError
-        ),
-        iluminarObjetosCorrectos(),
-      ]);
+          await Promise.all([
+            reproducirVoz(
+              nivel.audioError
+            ),
+            iluminarObjetosCorrectos(),
+          ]);
 
-      if (pantallaActivaRef.current) {
-        actualizarBloqueado(false);
-      }
+          if (
+            pantallaActivaRef.current
+          ) {
+            cambiarBloqueo(false);
+          }
 
-      /*
-       * Un error no reinicia los 40 segundos.
-       */
-      return;
-    }
+          return;
+        }
 
-    const nuevaSeleccion = [
-      ...objetosSeleccionados,
-      objeto.id,
-    ];
+        const nuevosSeleccionados =
+          [
+            ...seleccionadosRef.current,
+            objeto.id,
+          ];
 
-    setObjetosSeleccionados(
-      nuevaSeleccion
+        seleccionadosRef.current =
+          nuevosSeleccionados;
+
+        dispatch({
+          type: "SELECCIONAR",
+          id: objeto.id,
+        });
+
+        const cantidadPendiente =
+          nivel.cantidad -
+          nuevosSeleccionados.length;
+
+        if (
+          cantidadPendiente > 0
+        ) {
+          programarRecordatorio(
+            cantidadPendiente
+          );
+        } else {
+          await completarNivel();
+        }
+      },
+      [
+        cambiarBloqueo,
+        completarNivel,
+        estado.nivelCompletado,
+        iluminarObjetosCorrectos,
+        nivel.audioError,
+        nivel.cantidad,
+        programarRecordatorio,
+        reproducirVoz,
+      ]
     );
 
-    const cantidadPendiente =
-      nivel.cantidad -
-      nuevaSeleccion.length;
-
-    if (cantidadPendiente > 0) {
-      /*
-       * Cada respuesta correcta reinicia
-       * completamente los 40 segundos.
-       */
-      programarRecordatorio(
-        cantidadPendiente
-      );
-    } else {
-      limpiarRecordatorio();
-    }
-
-    if (
-      nuevaSeleccion.length ===
-      nivel.cantidad
-    ) {
-      await avanzarNivel();
-    }
-  };
-
   const repetirIntroduccion =
-    async () => {
+    useCallback(async () => {
       if (
         bloqueadoRef.current ||
         !nivel.audioIntroduccion
@@ -632,152 +834,130 @@ export default function GameScreen({ navigation }) {
         return;
       }
 
-      actualizarBloqueado(true);
+      cambiarBloqueo(true);
 
       await reproducirVoz(
         nivel.audioIntroduccion
       );
 
-      if (pantallaActivaRef.current) {
-        actualizarBloqueado(false);
+      if (
+        pantallaActivaRef.current
+      ) {
+        cambiarBloqueo(false);
       }
+    }, [
+      cambiarBloqueo,
+      nivel.audioIntroduccion,
+      reproducirVoz,
+    ]);
 
-      /*
-       * Repetir la presentación no reinicia
-       * el temporizador, porque solo lo hace
-       * una fruta seleccionada correctamente.
-       */
-    };
+  const renderizarObjeto =
+    useCallback(
+      ({ item }) => {
+        const seleccionado =
+          estado.seleccionados.includes(
+            item.id
+          );
 
-  const renderizarImagenAnimal = () => {
-    if (nivel.imagenAnimal) {
-      return (
-        <Image
-          source={nivel.imagenAnimal}
-          style={styles.imagenAnimal}
-          resizeMode="contain"
-        />
-      );
-    }
+        const debeIluminarse =
+          estado.mostrarAyuda &&
+          item.correcto &&
+          !seleccionado;
 
-    return (
-      <View
-        style={styles.placeholderAnimal}
-      >
-        <Text
-          style={
-            styles.textoPlaceholderAnimal
-          }
-        >
-          Imagen de {nivel.nombre}
-        </Text>
-      </View>
-    );
-  };
-
-  const renderizarObjeto = (objeto) => {
-    const seleccionado =
-      objetosSeleccionados.includes(
-        objeto.id
-      );
-
-    const debeIluminarse =
-      mostrarAyuda &&
-      objeto.correcto &&
-      !seleccionado;
-
-    const contenido = objeto.imagen ? (
-      <Image
-        source={objeto.imagen}
-        style={styles.imagenObjeto}
-        resizeMode="contain"
-      />
-    ) : (
-      <Text
-        style={styles.nombreObjeto}
-        numberOfLines={2}
-      >
-        {objeto.tipo}
-      </Text>
-    );
-
-    return (
-      <Animated.View
-        key={objeto.id}
-        style={[
-          styles.contenedorObjeto,
-          {
-            width: anchoObjeto,
-            height: anchoObjeto,
-          },
-
-          debeIluminarse && {
-            transform: [
+        return (
+          <Animated.View
+            style={[
+              styles.contenedorObjeto,
               {
-                scale: ayudaAnimada,
+                width: anchoObjeto,
+                height: anchoObjeto,
               },
-            ],
-          },
-        ]}
-      >
-        <Pressable
-          onPress={() =>
-            seleccionarObjeto(objeto)
-          }
-          disabled={
-            bloqueado || seleccionado
-          }
-          accessibilityRole="button"
-          accessibilityLabel={
-            objeto.tipo
-          }
-          style={({ pressed }) => [
-            styles.botonObjeto,
 
-            seleccionado &&
-              styles.objetoSeleccionado,
-
-            debeIluminarse &&
-              styles.objetoIluminado,
-
-            pressed &&
-              !seleccionado &&
-              styles.objetoPresionado,
-          ]}
-        >
-          {contenido}
-
-          {seleccionado && (
-            <View
-              style={
-                styles.marcaSeleccionado
+              debeIluminarse && {
+                transform: [
+                  {
+                    scale:
+                      ayudaAnimada,
+                  },
+                ],
+              },
+            ]}
+          >
+            <Pressable
+              onPress={() =>
+                seleccionarObjeto(
+                  item
+                )
               }
+              disabled={
+                estado.bloqueado ||
+                seleccionado
+              }
+              accessibilityRole="button"
+              accessibilityLabel={
+                item.tipo
+              }
+              style={({
+                pressed,
+              }) => [
+                styles.botonObjeto,
+
+                seleccionado &&
+                  styles.objetoSeleccionado,
+
+                debeIluminarse &&
+                  styles.objetoIluminado,
+
+                pressed &&
+                  !seleccionado &&
+                  styles.objetoPresionado,
+              ]}
             >
-              <Text
+              <Image
+                source={item.imagen}
                 style={
-                  styles.numeroSeleccionado
+                  styles.imagenObjeto
                 }
-              >
-                {objetosSeleccionados.indexOf(
-                  objeto.id
-                ) + 1}
-              </Text>
-            </View>
-          )}
-        </Pressable>
-      </Animated.View>
+                resizeMode="contain"
+              />
+
+              {seleccionado && (
+                <View
+                  style={
+                    styles.marcaSeleccionado
+                  }
+                >
+                  <Text
+                    style={
+                      styles.numeroSeleccionado
+                    }
+                  >
+                    {estado.seleccionados.indexOf(
+                      item.id
+                    ) + 1}
+                  </Text>
+                </View>
+              )}
+            </Pressable>
+          </Animated.View>
+        );
+      },
+      [
+        anchoObjeto,
+        ayudaAnimada,
+        estado.bloqueado,
+        estado.mostrarAyuda,
+        estado.seleccionados,
+        seleccionarObjeto,
+      ]
     );
-  };
 
   return (
     <SafeAreaView
       style={styles.container}
     >
       <ImageBackground
-        source={
-          nivel.imagenFondo ||
-          FONDO_PREDETERMINADO
-        }
+        source={nivel.imagenFondo}
         resizeMode="cover"
         style={styles.background}
       >
@@ -788,7 +968,15 @@ export default function GameScreen({ navigation }) {
             <View
               style={styles.filaSuperior}
             >
-              {renderizarImagenAnimal()}
+              <Image
+                source={
+                  nivel.imagenAnimal
+                }
+                style={
+                  styles.imagenAnimal
+                }
+                resizeMode="contain"
+              />
 
               <View
                 style={
@@ -808,10 +996,12 @@ export default function GameScreen({ navigation }) {
                     repetirIntroduccion
                   }
                   disabled={
-                    bloqueado ||
+                    estado.bloqueado ||
                     !nivel.audioIntroduccion
                   }
-                  style={({ pressed }) => [
+                  style={({
+                    pressed,
+                  }) => [
                     styles.botonAudio,
 
                     pressed &&
@@ -885,33 +1075,66 @@ export default function GameScreen({ navigation }) {
                 styles.progresoContainer
               }
             >
-              <Text
-                style={styles.progreso}
-              >
-                Encontrados:{" "}
-                {cantidadEncontrada} de{" "}
-                {nivel.cantidad}
-              </Text>
-
-              <Text
+              <View
                 style={
-                  styles.indicadorNivel
+                  styles.progresoEncontradosContainer
                 }
               >
-                Nivel {nivelActual + 1} de{" "}
-                {animales.length}
-              </Text>
+                <Text
+                  style={
+                    styles.progreso
+                  }
+                >
+                  Encontrados:{" "}
+                  {
+                    estado.seleccionados
+                      .length
+                  }{" "}
+                  de {nivel.cantidad}
+                </Text>
+              </View>
+
+              <View
+                style={
+                  styles.indicadorNivelContainer
+                }
+              >
+                <Text
+                  style={
+                    styles.indicadorNivel
+                  }
+                >
+                  Nivel{" "}
+                  {estado.nivelActual +
+                    1}{" "}
+                  de {niveles.length}
+                </Text>
+              </View>
             </View>
 
-            <View
-              style={styles.cuadricula}
-            >
-              {nivel.objetos.map(
+            <FlatList
+              data={nivel.objetos}
+              keyExtractor={(item) =>
+                item.id
+              }
+              renderItem={
                 renderizarObjeto
-              )}
-            </View>
+              }
+              numColumns={4}
+              scrollEnabled={false}
+              removeClippedSubviews={
+                false
+              }
+              extraData={estado}
+              contentContainerStyle={
+                styles.cuadricula
+              }
+              columnWrapperStyle={
+                styles.filaCuadricula
+              }
+            />
 
-            {nivelCompletado && (
+            {estado.nivelCompletado && (
               <View
                 style={
                   styles.mensajeCompletado
@@ -950,45 +1173,31 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor:
-      "rgba(255, 249, 232, 0.68)",
+      "rgba(255, 249, 232, 0.20)",
   },
 
   parteSuperior: {
-    flex: 1.05,
-    paddingHorizontal: 16,
-    paddingTop: 10,
+    flex: 1.25,
+    paddingHorizontal: 12,
+    paddingTop: 8,
     justifyContent: "space-between",
   },
 
   filaSuperior: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: 6,
+    paddingBottom: 35,
   },
 
   imagenAnimal: {
-    width: 125,
-    height: 125,
-  },
-
-  placeholderAnimal: {
-    width: 125,
-    height: 125,
-    borderWidth: 2,
-    borderStyle: "dashed",
-    borderColor: "#757575",
-    borderRadius: 18,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 10,
-    backgroundColor: "#FFFFFF",
-  },
-
-  textoPlaceholderAnimal: {
-    fontSize: 15,
-    fontWeight: "700",
-    textAlign: "center",
-    color: "#555555",
+    width: 180,
+    height: 180,
+    transform: [
+      {
+        translateY: 30,
+      },
+    ],
   },
 
   mensajeContainer: {
@@ -997,6 +1206,11 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     padding: 12,
     elevation: 3,
+    transform: [
+      {
+        translateY: 30,
+      },
+    ],
   },
 
   mensaje: {
@@ -1042,6 +1256,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     minHeight: 105,
+    marginTop: 15,
   },
 
   textoCantidad: {
@@ -1066,36 +1281,80 @@ const styles = StyleSheet.create({
   },
 
   parteJuego: {
-    flex: 1.95,
+    flex: 1.75,
     paddingHorizontal: 12,
     paddingBottom: 12,
   },
 
   progresoContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent:
+      "space-between",
     alignItems: "center",
-    marginBottom: 8,
+    marginBottom: 12,
     paddingHorizontal: 5,
+    gap: 8,
+  },
+
+  progresoEncontradosContainer: {
+    flexShrink: 1,
+    backgroundColor:
+      "rgba(255, 255, 255, 0.95)",
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: "#4CAF50",
+    elevation: 5,
+
+    shadowColor: "#000000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.22,
+    shadowRadius: 3,
   },
 
   progreso: {
-    fontSize: 17,
-    fontWeight: "800",
-    color: "#2E7D32",
+    fontSize: 16,
+    fontWeight: "900",
+    color: "#1B5E20",
+    textAlign: "center",
+  },
+
+  indicadorNivelContainer: {
+    backgroundColor:
+      "rgba(255, 255, 255, 0.95)",
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: "#F57C00",
+    elevation: 5,
+
+    shadowColor: "#000000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.22,
+    shadowRadius: 3,
   },
 
   indicadorNivel: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#555555",
+    fontSize: 17,
+    fontWeight: "900",
+    color: "#C94F00",
+    textAlign: "center",
   },
 
   cuadricula: {
-    flex: 1,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    alignContent: "space-around",
+    flexGrow: 1,
+    justifyContent: "space-around",
+  },
+
+  filaCuadricula: {
     justifyContent: "space-around",
   },
 
@@ -1111,12 +1370,16 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     justifyContent: "center",
     alignItems: "center",
-    padding: 7,
+    padding: 2,
     elevation: 2,
   },
 
   objetoPresionado: {
-    transform: [{ scale: 0.93 }],
+    transform: [
+      {
+        scale: 0.93,
+      },
+    ],
   },
 
   objetoSeleccionado: {
@@ -1133,16 +1396,8 @@ const styles = StyleSheet.create({
   },
 
   imagenObjeto: {
-    width: "88%",
-    height: "88%",
-  },
-
-  nombreObjeto: {
-    fontSize: 14,
-    fontWeight: "800",
-    color: "#424242",
-    textAlign: "center",
-    textTransform: "capitalize",
+    width: "100%",
+    height: "100%",
   },
 
   marcaSeleccionado: {
