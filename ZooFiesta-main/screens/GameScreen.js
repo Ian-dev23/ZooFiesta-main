@@ -1,11 +1,5 @@
-import React, {
-  useCallback,
-  useEffect,
-  useReducer,
-  useRef,
-  useState,
-} from "react";
-
+// Pantalla de juego con niveles, audio, selección de objetos y avance por niveles.
+import React, { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import {
   Animated,
   FlatList,
@@ -19,7 +13,6 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
-
 import { Audio } from "expo-av";
 import { useFocusEffect } from "@react-navigation/native";
 import * as NavigationBar from "expo-navigation-bar";
@@ -870,19 +863,7 @@ export default function GameScreen({
           return;
         }
 
-        /*
-         * Cada selección reinicia
-         * el contador de 40 segundos.
-         */
-        limpiarRecordatorio();
 
-        if (!objeto.correcto) {
-          cambiarBloqueo(true);
-
-          await Promise.all([
-            reproducirVoz(
-              nivel.audioError
-            ),
 
             iluminarObjetosCorrectos(),
           ]);

@@ -10,7 +10,7 @@ export default function SoundButton({ onPress, active = true }) {
     >
       <Image
         source={require("../../assets/botton/sonido_btn.png")}
-        style={styles.image} // <-- Corregido de styles.icon a styles.image
+        style={styles.image}
         resizeMode="contain"
       />
     </TouchableOpacity>
@@ -19,20 +19,20 @@ export default function SoundButton({ onPress, active = true }) {
 
 const styles = StyleSheet.create({
   button: {
-    width: 56,            // Exactamente igual al de Settings
-    height: 56,           // Exactamente igual al de Settings
-    borderRadius: 28,     // Lo hace perfectamente circular
-    backgroundColor: "#171717", // Mismo fondo crema de tu otro botón
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "#171717",
     justifyContent: "center",
     alignItems: "center",
-    borderWidth: 2,       // Mismo grosor de borde
-    borderColor: "#fdfdfd", // Mismo color verde de borde
+    borderWidth: 2,
+    borderColor: "#fdfdfd",
   },
   inactive: {
     opacity: 0.5,
   },
   image: {
-    width: "290%",      
+    width: "290%",
     height: "290%",
   },
 });

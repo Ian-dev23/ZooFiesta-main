@@ -12,6 +12,10 @@ import {
 
 import { Image as ExpoImage } from "expo-image";
 
+/**
+ * `PlayButton` es el botón principal animado de la pantalla Home.
+ * Solo mejora la experiencia visual; no contiene lógica de negocio.
+ */
 function PlayButton({ onPress }) {
   const escalaAnimada = useRef(
     new Animated.Value(1)

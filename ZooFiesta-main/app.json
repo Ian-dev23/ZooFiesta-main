@@ -6,34 +6,29 @@
     "orientation": "portrait",
     "icon": "./assets/logo/titulo_logo.png",
     "newArchEnabled": true,
-
     "splash": {
       "image": "./assets/logo/titulo_logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#000000"
     },
-
     "ios": {
       "supportsTablet": true
     },
-
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/logo/titulo_logo.png",
         "backgroundColor": "#000000"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.iantorres.zoofiesta"
     },
-
     "androidNavigationBar": {
       "visible": "sticky-immersive",
       "backgroundColor": "#000000"
     },
-
     "web": {
       "favicon": "./assets/logo/titulo_logo.png"
     },
-
     "plugins": [
       [
         "expo-splash-screen",
@@ -44,6 +39,11 @@
           "backgroundColor": "#000000"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "005452d6-b81d-477f-8e55-c44136d64dfc"
+      }
+    }
   }
 }

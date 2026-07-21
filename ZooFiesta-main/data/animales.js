@@ -1,9 +1,7 @@
+// Número máximo de objetos en la cuadrícula.
 const TOTAL_OBJETOS = 12;
 
-/*
- * Audios de error e inactividad
- * correspondientes a cada animal.
- */
+// Audios de error e inactividad para cada animal.
 const AUDIOS = Object.freeze({
   conejo: {
     error: require(
@@ -56,9 +54,7 @@ const AUDIOS = Object.freeze({
   },
 });
 
-/*
- * Fondos de cada nivel.
- */
+// Fondos para cada nivel.
 const FONDOS = Object.freeze({
   conejo: require(
     "../assets/backgrounds/HabitatConejo.png"
@@ -81,9 +77,7 @@ const FONDOS = Object.freeze({
   ),
 });
 
-/*
- * Imágenes principales de los animales.
- */
+// Imágenes principales de los animales.
 const IMAGENES_ANIMALES = Object.freeze({
   conejo: require(
     "../assets/animals/Conejo.png"
@@ -106,9 +100,7 @@ const IMAGENES_ANIMALES = Object.freeze({
   ),
 });
 
-/*
- * Objetos disponibles en el juego.
- */
+// Objetos disponibles en el juego.
 const OBJETOS = Object.freeze({
   zanahoria: {
     singular: "zanahoria",
@@ -246,9 +238,7 @@ const OBJETOS = Object.freeze({
   },
 });
 
-/*
- * Configuración de los cinco niveles.
- */
+// Configuración de los cinco niveles.
 const configuraciones = Object.freeze([
   {
     id: 1,
@@ -454,10 +444,7 @@ const configuraciones = Object.freeze([
   },
 ]);
 
-/*
- * Obtiene un número entero aleatorio
- * dentro del rango indicado.
- */
+// Obtiene un número aleatorio entero dentro del rango indicado.
 const obtenerNumeroAleatorio = (
   minimo,
   maximo
@@ -470,10 +457,7 @@ const obtenerNumeroAleatorio = (
   );
 };
 
-/*
- * Mezcla un arreglo sin modificar
- * el arreglo original.
- */
+// Mezcla un arreglo sin modificar el arreglo original.
 const mezclarElementos = (
   elementos
 ) => {
@@ -507,10 +491,7 @@ const mezclarElementos = (
   return resultado;
 };
 
-/*
- * Genera un identificador diferente
- * para cada objeto de la cuadrícula.
- */
+// Genera un identificador único para cada objeto de la cuadrícula.
 const crearId = (
   nivelId,
   tipo,
@@ -529,9 +510,7 @@ const crearId = (
   );
 };
 
-/*
- * Obtiene un objeto del catálogo.
- */
+// Obtiene un objeto del catálogo por tipo.
 const obtenerObjeto = (tipo) => {
   const objeto = OBJETOS[tipo];
 
@@ -544,9 +523,7 @@ const obtenerObjeto = (tipo) => {
   return objeto;
 };
 
-/*
- * Crea las frutas correctas.
- */
+// Crea los objetos correctos del nivel.
 const crearObjetosCorrectos = (
   configuracion,
   cantidad,
@@ -578,10 +555,7 @@ const crearObjetosCorrectos = (
   );
 };
 
-/*
- * Crea los objetos incorrectos
- * que funcionan como distractores.
- */
+// Crea los objetos distractores del nivel.
 const crearObjetosDistractores = (
   configuracion,
   cantidad
@@ -641,9 +615,7 @@ const crearObjetosDistractores = (
     });
 };
 
-/*
- * Genera un nivel completo.
- */
+// Genera un nivel jugable completo a partir de la configuración.
 export const crearNivelJugable = (
   configuracion
 ) => {
@@ -759,10 +731,7 @@ export const crearNivelJugable = (
   };
 };
 
-/*
- * Crea los cinco niveles
- * de una partida.
- */
+// Crea los cinco niveles de una partida.
 export const crearPartida = () => {
   return configuraciones.map(
     (configuracion) =>

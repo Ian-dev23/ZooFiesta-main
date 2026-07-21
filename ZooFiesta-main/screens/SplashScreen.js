@@ -1,12 +1,6 @@
+// Pantalla de presentación inicial. Configura la barra de navegación y redirige a Home.
 import React, { useEffect } from "react";
-
-import {
-  Platform,
-  SafeAreaView,
-  StyleSheet,
-  View,
-} from "react-native";
-
+import { Platform, SafeAreaView, StyleSheet, View } from "react-native";
 import { Image as ExpoImage } from "expo-image";
 import * as NavigationBar from "expo-navigation-bar";
 

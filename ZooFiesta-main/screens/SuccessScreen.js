@@ -1,8 +1,5 @@
-import React, {
-  useCallback,
-  useState,
-} from "react";
-
+// Pantalla de éxito al finalizar todos los niveles. Muestra el nombre del jugador y controla navegación final.
+import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -14,15 +11,9 @@ import {
   Text,
   View,
 } from "react-native";
-
-import AsyncStorage from
-  "@react-native-async-storage/async-storage";
-
-import { useFocusEffect } from
-  "@react-navigation/native";
-
-import * as NavigationBar from
-  "expo-navigation-bar";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "@react-navigation/native";
+import * as NavigationBar from "expo-navigation-bar";
 
 const CLAVE_NOMBRE = "nombreJugador";
 
@@ -246,11 +237,6 @@ const styles = StyleSheet.create({
     position: "relative",
   },
 
-  /*
-   * El nombre aparece dentro del cartel,
-   * debajo del mensaje que ya está
-   * incluido en la imagen.
-   */
   contenedorNombre: {
     position: "absolute",
 
@@ -319,11 +305,6 @@ botonJugar: {
   justifyContent: "center",
   alignItems: "center",
   marginBottom:45,
-},
-
-imagenBoton: {
-  width: "100%",
-  height: "100%",
 },
 
   imagenBoton: {

@@ -23,7 +23,6 @@ const styles = StyleSheet.create({
     height: 56,
     justifyContent: "center",
     alignItems: "center",
-    // ❌ Eliminamos backgroundColor, borderWidth y borderColor
   },
 
   image: {
